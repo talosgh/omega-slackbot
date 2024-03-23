@@ -7,6 +7,7 @@ import modules as omega
 
 class OmegaSlackBot:
     def __init__(self):
+        self.name = "Omega Slack Bot"
         self.app_config = omega.OmegaConfiguration()
         self.log = omega.Logger(self.app_config).get_logger()
         # self.db = omega.Database(self.log, self.app_config)
@@ -14,6 +15,7 @@ class OmegaSlackBot:
             self.log, (self.app_config.doc_path, self.app_config.doc_download_path)
         )
         self.app = bolt.App(token=self.app_config.SLACK_BOT_TOKEN)
+        self.app.use(self.catch_all_events_middleware())
 
         self.event_handler = omega.PluginEventManager(self)
         self.plugin_manager = omega.PluginManager(self, plugins_path="plugins/")
@@ -21,8 +23,6 @@ class OmegaSlackBot:
         self.event_handler.subscribe("plugin_data_event", self.handle_plugin_data)
         self.event_handler.subscribe("log_event", self.handle_plugin_log_event)
         self.event_handler.subscribe("identify", self.handle_plugin_identify)
-
-        self.start_omega()
 
     def handle_plugin_identify(self, **kwargs):
         self.log.info(
@@ -68,9 +68,18 @@ class OmegaSlackBot:
     def plugins_send_event(self, event_name, *args, **kwargs):
         self.event_handler.publish(event_name, *args, **kwargs)
 
-    def start_omega(self):
+    def catch_all_events_middleware(self):
+        def middleware(context, body, next):
+            event_type = body.get("event", {}).get("type", "unknown")
 
-        self.db = self.plugins_send_event("initialize_db")
+            print(f"Received an event: {event_type}")
+            omega.EventLogger(self.log, body, self.app, self.db)
+            self.plugins_send_event(event_type)
+            return next()
+
+        return middleware
+
+    def start_omega(self):
 
         @self.app.event("app_mention")
         def handle_message(body):
@@ -103,7 +112,6 @@ class OmegaSlackBot:
                 query_result = self.plugins_send_event(
                     "database_query", query=query, params=params
                 )
-                # self.db.query(query, params)
             else:
                 self.log.info("Received a direct message")
 
@@ -153,7 +161,9 @@ class OmegaSlackBot:
 if __name__ == "__main__":
     omegabot = OmegaSlackBot()
     omegabot.plugins_initialize()
+    omegabot.db = omegabot.plugins_send_event("database_init")
     handler = SocketModeHandler(
         omegabot.app, omegabot.app_config.SLACK_APP_TOKEN
     ).start()
+    omegabot.start_omega()
     handler.start()

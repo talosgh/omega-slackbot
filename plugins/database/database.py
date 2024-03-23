@@ -3,27 +3,32 @@ import sys
 
 
 class Plugin:
+
     def __init__(self, app, config):
         self.app = app
         self.config = config
         self.name = config["name"]
         self.version = config["version"]
+        self.author = config["author"]
+        self.github = config["github"]
+        self.description = config["description"]
         self.app.event_handler.subscribe("identify", self.identify)
         self.app.event_handler.subscribe(
             "application_started", self.on_application_started
         )
-        self.app.event_handler.subscribe("identify", self.identify)
+
         self.app.event_handler.subscribe("database_query", self.query)
-        self.init_db()
+        self.app.event_handler.subscribe("database_init", self.init_db)
+        # self.init_db()
 
     def identify(self):
         self.app.event_handler.publish(
             "identify",
             name=self.name,
             version=self.version,
-            author=self.config["author"],
-            github=self.config["github"],
-            description=self.config["description"],
+            author=self.suthor,
+            github=self.github,
+            description=self.description,
         )
 
     def on_application_started(self):

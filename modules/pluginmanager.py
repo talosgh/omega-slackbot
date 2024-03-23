@@ -19,7 +19,20 @@ class PluginManager:
         config_path = os.path.join(plugin_dir, "plugin.yml")
         if os.path.exists(config_path):
             with open(config_path, "r") as file:
-                plugin_config = yaml.safe_load(file)
+                try:
+                    plugin_config = yaml.safe_load(file)
+                    # Check if plugin_config is None or if it's missing essential keys
+                    if plugin_config is None or "name" not in plugin_config:
+                        self.app.log.warning(
+                            f"Skipping plugin at {plugin_dir}: 'plugin.yml' is empty or invalid."
+                        )
+                        return
+                except yaml.YAMLError as e:
+                    self.app.log.error(
+                        f"Error loading 'plugin.yml' from {plugin_dir}: {e}"
+                    )
+                    return  # Skip this plugin due to error
+
                 self.app.log.info(f"Loading plugin: {plugin_config['name']}")
                 self.import_plugin_module(plugin_dir, plugin_config)
 
@@ -37,15 +50,15 @@ class PluginManager:
                 )
 
     def get_plugins_info(self):
-        plugins_info = []
+        plugins_info = []  # Initialize an empty list to hold plugin information.
         for entry in self.plugins:
             config = entry["config"]
             plugin_info = {
                 "name": config["name"],
-                "version": config["version"],
-                "author": config["author"],
+                "version": config.get("version", "Unknown"),
+                "author": config.get("author", "Unknown"),
                 "description": config.get("description", "No description provided"),
                 "github": config.get("github", "Not provided"),
             }
-            plugins_info.append(plugin_info)
-        return plugins_info
+            plugins_info.append(plugin_info)  # Add the dictionary to the list.
+        return plugins_info  # Return the list of dictionaries.
