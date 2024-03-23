@@ -1,3 +1,4 @@
+#!.venv/bin/python
 import slack_bolt as bolt
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
