@@ -1,0 +1,17 @@
+[Unit]
+Description="OMEGA Slackbot"
+After=network.target
+
+[Service]
+Type=simple
+User=<SYSTEM USER FOR THE BOT>
+WorkingDirectory=<REPOSITORY DIRECTORY>
+Environment=PYTHONPATH=<REPOSITORY DIRECTORY>
+ExecStart=<REPOSITORY DIRECTORY>/.venv/bin/python omega-slackbot.py
+Restart=on-failure
+SyslogIdentifier="OMEGA-slackbot"
+RestartSec = 5
+TimeoutStartSec = infinity
+
+[Install]
+WantedBy = multi-user.target
