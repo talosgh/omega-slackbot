@@ -3,3 +3,5 @@ version: 1.0
 author: theesfeld
 github: https://github.com/theesfeld
 description: Parse files and return the contents
+events:
+  - parse_file
