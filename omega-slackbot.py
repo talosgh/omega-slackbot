@@ -74,6 +74,7 @@ class OmegaSlackBot:
         @self.app.event("app_mention")
         def handle_message(body):
             event_data = omega.EventLogger(self.log, body, self.app, self.db)
+            self.plugins_send_event(body["event"]["type"])
             response_str = "Please don't pollute the channel with messages. I only respond to direct messages."
             self.respond_quietly(
                 event_data.user_id, event_data.channel_id, response_str
@@ -82,6 +83,7 @@ class OmegaSlackBot:
         @self.app.event("message")
         def handle_message_events(body):
             event_data = omega.EventLogger(self.log, body, self.app, self.db)
+            self.plugins_send_event(body["event"]["type"])
             if "files" in body["event"]:
                 file_handler = omega.FileHandler(
                     self.app, event_data, self.log, self.app_config
@@ -108,19 +110,22 @@ class OmegaSlackBot:
         def invoice_command(ack, body):
             ack("invoice command received")
             event_data = omega.EventLogger(self.log, body, self.app, self.db)
-            self.log.info("Received a /invoice command")
+            self.plugins_send_event(body["event"]["type"])
 
         @self.app.event("file_created")
         def handle_file_created_events(body, logger):
             event_data = omega.EventLogger(self.log, body, self.app, self.db)
+            self.plugins_send_event(body["event"]["type"])
 
         @self.app.event("file_shared")
         def handle_file_shared(ack, body):
             event_data = omega.EventLogger(self.log, body, self.app, self.db)
+            self.plugins_send_event(body["event"]["type"])
 
         @self.app.event("app_home_opened")
         def handle_app_home_opened(ack, body):
             event_data = omega.EventLogger(self.log, body, self.app, self.db)
+            self.plugins_send_event(body["event"]["type"])
             homeview_handler = omega.AppHome(event_data, self.db)
             self.app.client.views_publish(homeview_handler.homeview)
 
