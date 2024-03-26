@@ -1,22 +1,26 @@
+import plugin_loader as plugin_loader
 import json
 from datetime import datetime
 
-from modules.database import Database
 from modules.logger import get_logger
 
 
-class EventLogger:
-    def __init__(self, body, app):
+class EventLogger(plugin_loader.EventLogger):
+    _alias_ = "EventLogger"
+    _version_ = "1.0"
+
+    def __init__(self, body, app, db):
         self.logger = get_logger("EventLogger")
         self.body = body
         self.app = app
-        self.db = Database()
+        self.db = db
         self.files_info = []
 
         self.parse_event_data()
         self.fetch_user_profile()
         if "files" in self.body.get("event", {}):
             self.handle_files()
+        self.log_event()
 
     def parse_event_data(self):
         event = self.body.get("event", {})
@@ -40,20 +44,35 @@ class EventLogger:
             self.logger.warning("No user ID found in event.")
 
     def handle_files(self):
+        self.has_files = False
+        self.files_info = []
+
+        # Check for multiple files
         files = self.body.get("event", {}).get("files", [])
-        for file in files:
-            file_id = file.get("id")
-            file_info_response = self.app.client.files_info(file=file_id)
-            file_info = file_info_response.get("file", {})
-            self.files_info.append(
-                {
-                    "id": file_id,
-                    "name": file_info.get("name"),
-                    "url_private_download": file_info.get("url_private_download"),
-                    "filetype": file_info.get("filetype"),
-                    "size": file_info.get("size"),
-                }
-            )
+        if files:
+            self.has_files = True
+            for file in files:
+                self.process_file(file)
+
+        # Check for a single file
+        elif "file" in self.body.get("event", {}):
+            self.has_files = True
+            file = self.body["event"]["file"]
+            self.process_file(file)
+
+    def process_file(self, file):
+        file_id = file.get("id")
+        file_info_response = self.app.client.files_info(file=file_id)
+        file_info = file_info_response.get("file", {})
+        self.files_info.append(
+            {
+                "id": file_id,
+                "name": file_info.get("name"),
+                "url_private_download": file_info.get("url_private_download"),
+                "filetype": file_info.get("filetype"),
+                "size": file_info.get("size"),
+            }
+        )
 
     def log_event(self):
         body_json = json.dumps(self.body)
@@ -76,10 +95,28 @@ class EventLogger:
                     channel_id, files_info, user_fname, user_lname, 
                     user_fullname, user_email) 
                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"""
-
         self.db.execute_query(query, params)
         self.logger.info(
             f"Logged event: {self.event_type} from {self.user_fullname} in channel {self.channel_id} at {self.event_ts}"
         )
+        return None
 
-        return query, params
+    def to_dict(self):
+        if self.files_info is None:
+            self.files_info = {}
+        return {
+            "event": {
+                "type": self.event_type,
+                "timestamp": self.event_ts,
+                "text": self.event_text,
+                "channel_id": self.channel_id,
+            },
+            "user": {
+                "id": self.user_id,
+                "first_name": self.user_fname,
+                "last_name": self.user_lname,
+                "full_name": self.user_fullname,
+                "email": self.user_email,
+            },
+            "files": self.files_info,
+        }
