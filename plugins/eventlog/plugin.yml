@@ -1,5 +1,0 @@
-name: eventlog
-version: 1.0
-author: theesfeld
-github: https://github.com/theesfeld
-description: logs events to the database

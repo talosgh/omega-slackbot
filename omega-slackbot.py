@@ -1,142 +1,51 @@
 #!.venv/bin/python
 import slack_bolt as bolt
+import datetime
+import os
+from zipfile import ZipFile
 from slack_bolt.adapter.socket_mode import SocketModeHandler
+import pluginlib
 
 import modules as omega
 
 
 class OmegaSlackBot:
     def __init__(self):
-        self.name = "Omega Slack Bot"
-        self.app_config = omega.OmegaConfiguration()
-        self.log = omega.Logger(self.app_config).get_logger()
-        # self.db = omega.Database(self.log, self.app_config)
-        self.app_directories = omega.Directories(
-            self.log, (self.app_config.doc_path, self.app_config.doc_download_path)
-        )
-        self.app = bolt.App(token=self.app_config.SLACK_BOT_TOKEN)
+        self.name = "APPLICATION"
+        self.config = omega.OmegaConfiguration()
+        self.logger = omega.get_logger(self.name)
+        self.logger.info(f"Logger Initialized")
+        self.db = omega.Database(self.config)
+        self.initialize_plugins()
+        self.plugins.parser.Directory(
+            paths=[
+                self.config.get("omega.documents.directory"),
+                self.config.get("omega.documents.download_directory"),
+            ]
+        ).parse(),
+        self.logger.info(f"Creating Slack Instance")
+        self.app = bolt.App(token=self.config.get("slack.bot_token"))
         self.app.use(self.catch_all_events_middleware())
+        self.register_event_handlers()
 
-        self.event_handler = omega.PluginEventManager(self)
-        self.plugin_manager = omega.PluginManager(self, plugins_path="plugins/")
-
-        self.event_handler.subscribe("plugin_data_event", self.handle_plugin_data)
-        self.event_handler.subscribe("log_event", self.handle_plugin_log_event)
-        self.event_handler.subscribe("identify", self.handle_plugin_identify)
-
-    def handle_plugin_identify(self, **kwargs):
-        self.log.info(
-            f"Plugin Information: {kwargs['name']} Version: {kwargs['version']}"
-        )
-        self.log.info(f"Author: {kwargs['author']} GitHub: {kwargs['github']}")
-        self.log.info(f"Description: {kwargs['description']}\n")
-
-    def handle_plugin_log_event(self, message, level, plugin_name):
-        level = level.upper()
-        if level == "ERROR":
-            self.log.error(f"[PLUGIN ({plugin_name})] {message}")
-        elif level == "DEBUG":
-            self.log.debug(f"[PLUGIN ({plugin_name})] {message}")
-        elif level == "WARNING":
-            self.log.warning(f"[PLUGIN ({plugin_name})] {message}")
-        else:
-            self.log.info(f"[PLUGIN ({plugin_name})] {message}")
-
-    def handle_plugin_data(self, data, context):
-        plugin_name = context["plugin_name"]
-        event_type = context["event_type"]
-        self.log.info(
-            f"Received data from {plugin_name} in response to {event_type}: {data}"
-        )
-
-    def plugins_initialize(self):
-        self.plugin_manager.load_plugins()
-        self.log.info("Application started. Notifying plugins...")
-        self.event_handler.publish("application_started")
-        plugins_info = self.plugin_manager.get_plugins_info()
-        for plugin_info in plugins_info:
-            self.log.info("Plugin Information:")
-            self.log.info(
-                f"Plugin: {plugin_info['name']} Version: {plugin_info['version']}"
-            )
-            self.log.info(
-                f"Author: {plugin_info['author']} GitHub: {plugin_info['github']}"
-            )
-            self.log.info(f"Description: {plugin_info['description']}\n")
-        return None
-
-    def plugins_send_event(self, event_name, *args, **kwargs):
-        self.event_handler.publish(event_name, *args, **kwargs)
+    def initialize_plugins(self, path=None):
+        self.logger.info(f"Initializing Plugins")
+        if path is None:
+            path = f"{self.config.get('omega.plugins.directory', 'plugins/')}"
+        self.loader = pluginlib.PluginLoader(paths=[path])
+        self.plugins = self.loader.plugins
+        self.logger.info(f"Loaded Plugins: {self.plugins}")
 
     def catch_all_events_middleware(self):
         def middleware(context, body, next):
-            event_type = body.get("event", {}).get("type", "unknown")
-
-            print(f"Received an event: {event_type}")
-            omega.EventLogger(self.log, body, self.app, self.db)
-            self.plugins_send_event(event_type)
+            event_data = self.plugins.eventlogger.EventLogger(
+                body, self.app, self.db
+            ).to_dict()
+            self.plugins.Database
+            context["event_data"] = event_data
             return next()
 
         return middleware
-
-    def start_omega(self):
-
-        @self.app.event("app_mention")
-        def handle_message(body):
-            event_data = omega.EventLogger(self.log, body, self.app, self.db)
-            self.plugins_send_event(body["event"]["type"])
-            response_str = "Please don't pollute the channel with messages. I only respond to direct messages."
-            self.respond_quietly(
-                event_data.user_id, event_data.channel_id, response_str
-            )
-
-        @self.app.event("message")
-        def handle_message_events(body):
-            event_data = omega.EventLogger(self.log, body, self.app, self.db)
-            self.plugins_send_event(body["event"]["type"])
-            if "files" in body["event"]:
-                file_handler = omega.FileHandler(
-                    self.app, event_data, self.log, self.app_config
-                )
-                parse_handler = self.plugins_send_event(
-                    "parse_file", file="Documents/sample.pdf"
-                )
-                for f in parse_handler.filenames:
-                    omega.FileHandler.send(self, f)
-                query = "INSERT INTO doc_dump (file, text, user_id) VALUES (%s, %s, %s)"
-                params = (
-                    parse_handler.file,
-                    parse_handler.text,
-                    event_data.user_fullname,
-                )
-                query_result = self.plugins_send_event(
-                    "database_query", query=query, params=params
-                )
-            else:
-                self.log.info("Received a direct message")
-
-        @self.app.command("/invoice")
-        def invoice_command(ack, body):
-            ack("invoice command received")
-            event_data = omega.EventLogger(self.log, body, self.app, self.db)
-            self.plugins_send_event(body["event"]["type"])
-
-        @self.app.event("file_created")
-        def handle_file_created_events(body, logger):
-            event_data = omega.EventLogger(self.log, body, self.app, self.db)
-            self.plugins_send_event(body["event"]["type"])
-
-        @self.app.event("file_shared")
-        def handle_file_shared(ack, body):
-            event_data = omega.EventLogger(self.log, body, self.app, self.db)
-            self.plugins_send_event(body["event"]["type"])
-
-        @self.app.event("app_home_opened")
-        def handle_app_home_opened(ack, body):
-            event_data = omega.EventLogger(self.log, body, self.app, self.db)
-            self.plugins_send_event(body["event"]["type"])
-            homeview_handler = omega.AppHome(event_data, self.db)
-            self.app.client.views_publish(homeview_handler.homeview)
 
     def respond_quietly(self, user, channel, response_str):
         try:
@@ -145,25 +54,107 @@ class OmegaSlackBot:
                 blocks=[
                     {
                         "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": response_str,
-                        },
+                        "text": {"type": "mrkdwn", "text": response_str},
                     }
                 ],
                 text=response_str,
                 user=user,
             )
         except Exception as e:
-            self.log.error(f"Error responding to message: {e}")
+            self.logger.error(
+                f"Error responding to message in {channel} to {user}: {e}"
+            )
+
+    def register_event_handlers(self):
+
+        self.logger.info(f"Registering Event Handlers and Starting Omega Slackbot")
+
+        @self.app.event("app_mention")
+        def handle_message(context):
+            event_data = context["event_data"]
+            response_str = "Please don't pollute the channel with messages. I only respond to direct messages."
+            self.respond_quietly(
+                event_data.user_id, event_data.channel_id, response_str
+            )
+
+        @self.app.event("message")
+        def handle_message_events(ack, context):
+            ack()
+            event_data = context["event_data"]
+            for file_info in event_data["files"]:
+                try:
+                    download_filename = self.plugins.files.FileHandler(
+                        app=self.app,
+                        config=self.config,
+                        file_name=file_info["name"],
+                        file_url=file_info["url_private_download"],
+                    ).download()
+                    # TODO move back into file handler
+                    query = "INSERT INTO doc_dump (file, user_id) VALUES (%s, %s)"
+                    params = (
+                        download_filename,
+                        event_data["user"].get("full_name"),
+                    )
+                    self.db.execute_query(query, params)
+                    filenames = self.plugins.parser.FileParser(
+                        file=download_filename
+                    ).parse()
+                    for filename in getattr(filenames, "filenames", []):
+                        self.plugins.parser.file_handler.send(filename)
+                except Exception as e:
+                    self.logger.error(f"Error processing file: {e}")
+                # TODO zip plugin
+                unix_timestamp = (
+                    datetime.datetime.timestamp(datetime.datetime.now()) * 1000
+                )
+                z = os.path.join(
+                    self.config.get("omega.documents.directory"),
+                    self.config.get("omega.documents.download_directory"),
+                )
+                zipfile = (
+                    z
+                    + event_data["user"].get("full_name")
+                    + str(unix_timestamp)
+                    + ".zip"
+                )
+                with ZipFile(zipfile, "w") as zip:
+                    for filename in filenames:
+                        zip.write(filename)
+                        os.remove(filename)
+                    zip.write(download_filename)
+                    os.remove(download_filename)
+                self.respond_quietly(
+                    event_data["user"].get("id"),
+                    event_data["event"].get("channel_id"),
+                    f"Files processed: {filenames}",
+                )
+                self.plugins.files.FileHandler(
+                    app=self.app,
+                    config=self.config,
+                    file_name=zipfile,
+                    file_url=zipfile,
+                ).upload(
+                    channel=event_data["event"].get("channel_id"),
+                    file=zipfile,
+                )
+                os.remove(zipfile)
+
+        @self.app.event("file_created")
+        def handle_file_created_events(context):
+            return None
+
+        @self.app.event("file_shared")
+        def handle_file_shared(body):
+            return None
+
+        @self.app.event("app_home_opened")
+        def handle_app_home_opened(context):
+            homeview_handler = omega.AppHome(context, self.db)
+            self.app.client.views_publish(**homeview_handler.homeview)
 
 
 if __name__ == "__main__":
     omegabot = OmegaSlackBot()
-    omegabot.plugins_initialize()
-    omegabot.db = omegabot.plugins_send_event("database_init")
     handler = SocketModeHandler(
-        omegabot.app, omegabot.app_config.SLACK_APP_TOKEN
+        omegabot.app, omegabot.config.get("slack.app_token")
     ).start()
-    omegabot.start_omega()
-    handler.start()
