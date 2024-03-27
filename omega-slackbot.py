@@ -143,7 +143,7 @@ class OmegaSlackBot:
             SELECT * FROM vendors
             """
             result = self.db.execute_query(query)
-            print(result)
+            self.logger.info(result)
 
             with open("slackblocks/docprocess_modal.json", "r") as file:
                 modal_json_str = file.read()
