@@ -18,15 +18,14 @@ class FileHandler(plugin_loader.FileHandling):
         self.download_path = self.config.get(
             "omega.documents.download_directory", "Downloads"
         )
-        self.download_path = os.path.join(self.documents_path, self.download_path)
+        self.download_folder = os.path.join(self.documents_path, self.download_path)
 
     def download(self, **kwargs):
         user = kwargs.get("user")
         file_name = kwargs.get("file_name")
         file_url = kwargs.get("file_url")
-        download_folder = os.path.join(self.documents_path, self.download_path)
-        os.makedirs(download_folder, exist_ok=True)
-        download_filename = os.path.join(download_folder, file_name)
+        os.makedirs(self.download_folder, exist_ok=True)
+        download_filename = os.path.join(self.download_folder, file_name)
         try:
             response = requests.get(
                 file_url,
