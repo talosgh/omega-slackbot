@@ -1,6 +1,6 @@
 #!.venv/bin/python
 import slack_bolt as bolt
-import datetime
+import json
 import os
 from zipfile import ZipFile
 from slack_bolt.adapter.socket_mode import SocketModeHandler
@@ -39,6 +39,7 @@ class OmegaSlackBot:
 
     def catch_all_events_middleware(self):
         def middleware(context, body, next):
+            print(body)
             event_data = self.plugins.eventlogger.EventLogger(
                 body, self.app, self.db
             ).to_dict()
@@ -133,6 +134,23 @@ class OmegaSlackBot:
         def handle_app_home_opened(context):
             homeview_handler = omega.AppHome(context, self.db)
             self.app.client.views_publish(**homeview_handler.homeview)
+
+        @self.app.command("/doc")
+        def handle_doc_command(ack, context):
+            ack()
+            with open("slackblocks/docprocess_modal.json", "r") as file:
+                modal_json_str = file.read()
+                modal_json = json.loads(modal_json_str)
+            self.app.client.views_open(
+                trigger_id=context["event_data"]["command"].get("trigger_id", ""),
+                view=modal_json,
+            )
+
+        @self.app.view("doc_process_modal")
+        def handle_modal_submission(ack, context):
+            ack()
+            print(context)
+            # self.plugins.parser.DocProcess(context=context, app=self.app).process()
 
 
 if __name__ == "__main__":
