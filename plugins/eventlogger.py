@@ -17,34 +17,65 @@ class EventLogger(plugin_loader.EventLogger):
         self.db = db
         self.files_info = []
 
-        self.parse_event_data()
-        self.fetch_user_profile()
-        if "files" in self.body.get("event", {}):
-            self.handle_files()
+        self.event_type = None
+        self.event_ts = None
+        self.event_text = None
+        self.user_id = None
+        self.channel_id = None
+        self.user_fname = None
+        self.user_lname = None
+        self.user_fullname = None
+        self.user_email = None
+        self.command_trigger_id = None
+
+        if "event" in self.body:
+            self.parse_event()
+            if "user" in self.body.get("event", {}):
+                self.parse_user()
+            if "files" in self.body.get("event", {}):
+                self.parse_files()
+        elif "command" in self.body:
+            self.parse_command()
+
         self.log_event()
 
-    def parse_event_data(self):
-        event = self.body.get("event", {})
-        self.user_id = event.get("user") or event.get("user_id")
-        self.channel_id = event.get("channel") or event.get("channel_id")
-        self.event_type = event.get("type")
-        self.event_ts = datetime.fromtimestamp(
-            float(event.get("event_ts", 0))
-        ).strftime("%Y-%m-%d %H:%M:%S")
-        self.event_text = event.get("text", "")
+    def parse_channel(self):
+        response = self.app.client.conversations_info(channel=self.channel_id)
+        channel = response.get("channel", {})
+        self.channel_id = channel.get("id", "")
+        self.channel_name = channel.get("name", "")
 
-    def fetch_user_profile(self):
-        if self.user_id:
-            response = self.app.client.users_profile_get(user=self.user_id)
-            profile = response.get("profile", {})
-            self.user_fname = profile.get("first_name", "")
-            self.user_lname = profile.get("last_name", "")
-            self.user_fullname = profile.get("real_name", "")
-            self.user_email = profile.get("email", "")
+    def parse_event(self):
+        if self.body.get("event", {}):
+            event = self.body.get("event", {})
+            self.user_id = event.get("user") or event.get("user_id")
+            self.channel_id = event.get("channel") or event.get("channel_id")
+            self.event_type = event.get("type")
+            self.event_ts = datetime.fromtimestamp(
+                float(event.get("event_ts", 0))
+            ).strftime("%Y-%m-%d %H:%M:%S")
+            self.event_text = event.get("text", "")
         else:
-            self.logger.warning("No user ID found in event.")
+            self.logger.warning("No valid event provided")
 
-    def handle_files(self):
+    def parse_user(self):
+        response = self.app.client.users_profile_get(user=self.user_id)
+        profile = response.get("profile", {})
+        self.user_fname = profile.get("first_name", "")
+        self.user_lname = profile.get("last_name", "")
+        self.user_fullname = profile.get("real_name", "")
+        self.user_email = profile.get("email", "")
+
+    def parse_command(self):
+        self.event_type = self.body.get("command", "")
+        self.user_id = self.body.get("user_id", "")
+        if self.user_id:
+            self.parse_user()
+        self.channel_id = self.body.get("channel_id", "")
+        self.event_ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.command_trigger_id = self.body.get("trigger_id", "")
+
+    def parse_files(self):
         self.has_files = False
         self.files_info = []
 
@@ -111,6 +142,9 @@ class EventLogger(plugin_loader.EventLogger):
                 "timestamp": self.event_ts,
                 "text": self.event_text,
                 "channel_id": self.channel_id,
+            },
+            "command": {
+                "trigger_id": self.command_trigger_id,
             },
             "user": {
                 "id": self.user_id,

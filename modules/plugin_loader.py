@@ -57,15 +57,15 @@ class EventLogger(object):
         pass
 
     @pluginlib.abstractmethod
-    def parse_event_data(self):
+    def parse_event(self):
         pass
 
     @pluginlib.abstractmethod
-    def fetch_user_profile(self):
+    def parse_user(self):
         pass
 
     @pluginlib.abstractmethod
-    def handle_files(self):
+    def parse_files(self):
         pass
 
     @pluginlib.abstractmethod
@@ -78,4 +78,8 @@ class EventLogger(object):
 
     @pluginlib.abstractmethod
     def process_file(self, file):
+        pass
+
+    @pluginlib.abstractmethod
+    def parse_command(self):
         pass
