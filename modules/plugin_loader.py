@@ -9,11 +9,19 @@ class Parser(object):
         pass
 
 
+@pluginlib.Parent("slackevent")
+class SlackEvent(object):
+
+    @pluginlib.abstractmethod
+    def react(self):
+        pass
+
+
 @pluginlib.Parent("files")
 class FileHandling(object):
 
     @pluginlib.abstractmethod
-    def download(self):
+    def download(self, **kwargs):
         pass
 
     @pluginlib.abstractmethod

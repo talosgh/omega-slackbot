@@ -34,7 +34,8 @@ class OmegaSlackBot:
             path = f"{self.config.get('omega.plugins.directory', 'plugins/')}"
         self.loader = pluginlib.PluginLoader(paths=[path])
         self.plugins = self.loader.plugins
-        self.logger.info(f"Loaded Plugins: {self.plugins}")
+        for p in self.plugins:
+            self.logger.info(f"Loaded Plugin: {p}")
 
     def catch_all_events_middleware(self):
         def middleware(context, body, next):
@@ -78,24 +79,19 @@ class OmegaSlackBot:
             )
 
         @self.app.event("message")
-        def handle_message_events(ack, context):
-            ack()
+        def handle_message_events(context):
             event_data = context["event_data"]
+            print(event_data)
             for file_info in event_data["files"]:
                 try:
                     download_filename = self.plugins.files.FileHandler(
                         app=self.app,
                         config=self.config,
+                    ).download(
+                        user=event_data["user"].get("full_name"),
                         file_name=file_info["name"],
                         file_url=file_info["url_private_download"],
-                    ).download()
-                    # TODO move back into file handler
-                    query = "INSERT INTO doc_dump (file, user_id) VALUES (%s, %s)"
-                    params = (
-                        download_filename,
-                        event_data["user"].get("full_name"),
                     )
-                    self.db.execute_query(query, params)
                     filenames = self.plugins.parser.FileParser(
                         file=download_filename
                     ).parse()
@@ -103,26 +99,12 @@ class OmegaSlackBot:
                         self.plugins.parser.file_handler.send(filename)
                 except Exception as e:
                     self.logger.error(f"Error processing file: {e}")
-                # TODO zip plugin
-                unix_timestamp = (
-                    datetime.datetime.timestamp(datetime.datetime.now()) * 1000
+                zipfile = self.plugins.parser.Zipper().parse(
+                    documents_directory=self.config.get("omega.documents.directory"),
+                    filenames=filenames,
+                    download_filename=download_filename,
+                    user=event_data["user"].get("full_name"),
                 )
-                z = os.path.join(
-                    self.config.get("omega.documents.directory"),
-                    self.config.get("omega.documents.download_directory"),
-                )
-                zipfile = (
-                    z
-                    + event_data["user"].get("full_name")
-                    + str(unix_timestamp)
-                    + ".zip"
-                )
-                with ZipFile(zipfile, "w") as zip:
-                    for filename in filenames:
-                        zip.write(filename)
-                        os.remove(filename)
-                    zip.write(download_filename)
-                    os.remove(download_filename)
                 self.respond_quietly(
                     event_data["user"].get("id"),
                     event_data["event"].get("channel_id"),

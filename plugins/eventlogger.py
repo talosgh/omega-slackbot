@@ -1,4 +1,4 @@
-import plugin_loader as plugin_loader
+import modules.plugin_loader as plugin_loader
 import json
 from datetime import datetime
 
@@ -10,7 +10,7 @@ class EventLogger(plugin_loader.EventLogger):
     _version_ = "1.0"
 
     def __init__(self, body, app, db):
-        self.logger = get_logger("EventLogger")
+        self.logger = get_logger(self._alias_)
         self.body = body
         self.app = app
         self.db = db

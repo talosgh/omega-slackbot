@@ -1,4 +1,4 @@
-import plugin_loader as plugin_loader
+import modules.plugin_loader as plugin_loader
 import fitz
 import pandas as pd
 from modules.logger import get_logger
@@ -11,7 +11,6 @@ class FileParser(plugin_loader.Parser):
 
     def __init__(self, **kwargs) -> None:
         self.logger = get_logger(self._alias_)
-        self.logger.info(f"Initializing {self._alias_} - version {self._version_}")
         self.file = kwargs.get("file")
         pass
 
