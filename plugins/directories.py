@@ -1,4 +1,4 @@
-import plugin_loader as plugin_loader
+import modules.plugin_loader as plugin_loader
 from pathlib import Path
 from modules.logger import get_logger
 
@@ -9,7 +9,6 @@ class Directories(plugin_loader.Parser):
 
     def __init__(self, **kwargs) -> None:
         self.logger = get_logger(self._alias_)
-        self.logger.info(f"Initializing {self._alias_} - version {self._version_}")
         self.paths = kwargs.get("paths", ["Documents", "Downloads"])
 
     def parse(self, **kwargs):

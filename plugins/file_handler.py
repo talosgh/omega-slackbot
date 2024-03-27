@@ -1,4 +1,4 @@
-import plugin_loader as plugin_loader
+import modules.plugin_loader as plugin_loader
 import os
 from modules.logger import get_logger
 from modules.database import Database
@@ -10,26 +10,26 @@ class FileHandler(plugin_loader.FileHandling):
     _version_ = "1.0"
 
     def __init__(self, **kwargs) -> None:
+        self.logger = get_logger(self._alias_)
         self.app = kwargs.get("app")
         self.config = kwargs.get("config")
         self.bot_token = self.config.get("slack.bot_token")
-        self.file_name = kwargs.get("file_name")
-        self.file_url = kwargs.get("file_url")
-        self.documents_path = self.config.get("omega.documents.directory", "documents")
+        self.documents_path = self.config.get("omega.documents.directory", "Documents")
         self.download_path = self.config.get(
-            "omega.documents.download_directory", "downloads"
+            "omega.documents.download_directory", "Downloads"
         )
-        self.logger = get_logger(self._alias_)
-        self.logger.info(f"Initializing {self._alias_} - version {self._version_}")
+        self.download_path = os.path.join(self.documents_path, self.download_path)
 
-    def download(self):
+    def download(self, **kwargs):
+        user = kwargs.get("user")
+        file_name = kwargs.get("file_name")
+        file_url = kwargs.get("file_url")
         download_folder = os.path.join(self.documents_path, self.download_path)
         os.makedirs(download_folder, exist_ok=True)
-        download_filename = os.path.join(download_folder, self.file_name)
-        headers = {"Authorization": f"Bearer {self.bot_token}"}
+        download_filename = os.path.join(download_folder, file_name)
         try:
             response = requests.get(
-                self.file_url,
+                file_url,
                 allow_redirects=True,
                 headers={"Authorization": f"Bearer {self.bot_token}"},
             )
@@ -38,6 +38,14 @@ class FileHandler(plugin_loader.FileHandling):
                 file.write(response.content)
 
             self.logger.info(f"File saved as: {download_filename}")
+            db = Database(self.config)
+            query = "INSERT INTO doc_dump (file, user_id) VALUES (%s, %s)"
+            params = (
+                download_filename,
+                user,
+            )
+            db.execute_query(query, params)
+            self.logger.info(f"File saved to database: {download_filename}")
             return download_filename
         except Exception as e:
             self.logger.error(f"Error downloading file: {e}")
