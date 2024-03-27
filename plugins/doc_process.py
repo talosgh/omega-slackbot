@@ -1,5 +1,6 @@
 import modules.plugin_loader as plugin_loader
 from modules.logger import get_logger
+from modules.database import Database
 
 
 class DocProcess(plugin_loader.Parser):
@@ -10,6 +11,7 @@ class DocProcess(plugin_loader.Parser):
         self.logger = get_logger(self._alias_)
         self.app = kwargs.get("app")
         self.context = kwargs.get("context")
+        self.db = Database()
 
     def parse(self, **kwargs):
         self.ack()

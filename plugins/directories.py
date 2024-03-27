@@ -12,7 +12,6 @@ class Directories(plugin_loader.Parser):
         self.paths = kwargs.get("paths", ["Documents", "Downloads"])
 
     def parse(self, **kwargs):
-        self.logger.info(f"Creating Directories if they don't exist")
         for path in self.paths:
             directory = Path(path)
             try:
