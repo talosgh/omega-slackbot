@@ -10,7 +10,7 @@ class EventLogger(plugin_loader.EventLogger):
     _alias_ = "EventLogger"
     _version_ = "1.0"
 
-    def __init__(self, body, app, db):
+    def __init__(self, body, app, db) -> None:
         self.logger = get_logger(self._alias_)
         self.body = body
         self.app = app

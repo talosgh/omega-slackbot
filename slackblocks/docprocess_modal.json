@@ -1,258 +1,260 @@
-            {
-                "type": "modal",
-                "callback_id": "doc_process_modal",
-                "title": {
+{
+    "type": "modal",
+    "callback_id": "doc_process_modal",
+    "title": {
+        "type": "plain_text",
+        "text": "Document Processing",
+        "emoji": true
+    },
+    "submit": {
+        "type": "plain_text",
+        "text": "Submit",
+        "emoji": true
+    },
+    "close": {
+        "type": "plain_text",
+        "text": "Cancel",
+        "emoji": true
+    },
+    "blocks": [
+        {
+            "type": "input",
+            "block_id": "input_block_id",
+            "label": {
+                "type": "plain_text",
+                "text": "Upload Files"
+            },
+            "element": {
+                "type": "file_input",
+                "action_id": "file_input_action_id_1",
+                "filetypes": [
+                    "pdf"
+                ],
+                "max_files": 5
+            }
+        },
+        {
+            "type": "divider"
+        },
+        {
+            "type": "input",
+            "element": {
+                "type": "plain_text_input",
+                "action_id": "plain_text_input-action"
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "Originator",
+                "emoji": true
+            }
+        },
+        {
+            "type": "input",
+            "element": {
+                "type": "radio_buttons",
+                "options": [
+                    {
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Invoice",
+                            "emoji": true
+                        },
+                        "value": "invoice"
+                    },
+                    {
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Proposal",
+                            "emoji": true
+                        },
+                        "value": "proposal"
+                    }
+                ],
+                "action_id": "radio_buttons-action"
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "Document Type",
+                "emoji": true
+            }
+        },
+        {
+            "type": "divider"
+        },
+        {
+            "type": "input",
+            "dispatch_action": true,
+            "element": {
+                "type": "static_select",
+                "action_id": "vendor_select",
+                "placeholder": {
                     "type": "plain_text",
-                    "text": "Document Processing",
+                    "text": "Select a vendor",
                     "emoji": true
                 },
-                "submit": {
-                    "type": "plain_text",
-                    "text": "Submit",
-                    "emoji": true
-                },
-                "close": {
-                    "type": "plain_text",
-                    "text": "Cancel",
-                    "emoji": true
-                },
-                "blocks": [
+                "options": [
                     {
-                        "type": "input",
-                        "block_id": "input_block_id",
-                        "label": {
+                        "text": {
                             "type": "plain_text",
-                            "text": "Upload Files"
-                        },
-                        "element": {
-                            "type": "file_input",
-                            "action_id": "file_input_action_id_1",
-                            "filetypes": [
-                                "pdf"
-                            ],
-                            "max_files": 5
-                        }
-                    },
-                    {
-                        "type": "divider"
-                    },
-                    {
-                        "type": "input",
-                        "element": {
-                            "type": "plain_text_input",
-                            "action_id": "plain_text_input-action"
-                        },
-                        "label": {
-                            "type": "plain_text",
-                            "text": "Originator",
+                            "text": "*plain_text option 0*",
                             "emoji": true
-                        }
-                    },
-                    {
-                        "type": "input",
-                        "element": {
-                            "type": "radio_buttons",
-                            "options": [
-                                {
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "Invoice",
-                                        "emoji": true
-                                    },
-                                    "value": "invoice"
-                                },
-                                {
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "Proposal",
-                                        "emoji": true
-                                    },
-                                    "value": "proposal"
-                                }
-                            ],
-                            "action_id": "radio_buttons-action"
                         },
-                        "label": {
+                        "value": "value-0"
+                    },
+                    {
+                        "text": {
                             "type": "plain_text",
-                            "text": "Document Type",
+                            "text": "*plain_text option 1*",
                             "emoji": true
-                        }
-                    },
-                    {
-                        "type": "divider"
-                    },
-                    {
-                        "type": "input",
-                        "element": {
-                            "type": "static_select",
-                            "placeholder": {
-                                "type": "plain_text",
-                                "text": "Select a vendor",
-                                "emoji": true
-                            },
-                            "options": [
-                                {
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "*plain_text option 0*",
-                                        "emoji": true
-                                    },
-                                    "value": "value-0"
-                                },
-                                {
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "*plain_text option 1*",
-                                        "emoji": true
-                                    },
-                                    "value": "value-1"
-                                },
-                                {
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "*plain_text option 2*",
-                                        "emoji": true
-                                    },
-                                    "value": "value-2"
-                                }
-                            ],
-                            "action_id": "static_select-action"
                         },
-                        "label": {
-                            "type": "plain_text",
-                            "text": "Vendor",
-                            "emoji": true
-                        }
+                        "value": "value-1"
                     },
                     {
-                        "type": "input",
-                        "element": {
-                            "type": "static_select",
-                            "placeholder": {
-                                "type": "plain_text",
-                                "text": "Select a client",
-                                "emoji": true
-                            },
-                            "options": [
-                                {
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "*plain_text option 0*",
-                                        "emoji": true
-                                    },
-                                    "value": "value-0"
-                                },
-                                {
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "*plain_text option 1*",
-                                        "emoji": true
-                                    },
-                                    "value": "value-1"
-                                },
-                                {
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "*plain_text option 2*",
-                                        "emoji": true
-                                    },
-                                    "value": "value-2"
-                                }
-                            ],
-                            "action_id": "static_select-action"
+                        "text": {
+                            "type": "plain_text",
+                            "text": "*plain_text option 2*",
+                            "emoji": true
                         },
-                        "label": {
-                            "type": "plain_text",
-                            "text": "Client",
-                            "emoji": true
-                        }
-                    },
-                    {
-                        "type": "input",
-                        "element": {
-                            "type": "static_select",
-                            "placeholder": {
-                                "type": "plain_text",
-                                "text": "Select a location",
-                                "emoji": true
-                            },
-                            "options": [
-                                {
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "*plain_text option 0*",
-                                        "emoji": true
-                                    },
-                                    "value": "value-0"
-                                },
-                                {
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "*plain_text option 1*",
-                                        "emoji": true
-                                    },
-                                    "value": "value-1"
-                                },
-                                {
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "*plain_text option 2*",
-                                        "emoji": true
-                                    },
-                                    "value": "value-2"
-                                }
-                            ],
-                            "action_id": "static_select-action"
-                        },
-                        "label": {
-                            "type": "plain_text",
-                            "text": "Location",
-                            "emoji": true
-                        }
-                    },
-                    {
-                        "type": "divider"
-                    },
-                    {
-                        "type": "input",
-                        "element": {
-                            "type": "plain_text_input",
-                            "action_id": "plain_text_input-action"
-                        },
-                        "label": {
-                            "type": "plain_text",
-                            "text": "Document ID",
-                            "emoji": true
-                        }
-                    },
-                    {
-                        "type": "input",
-                        "element": {
-                            "type": "plain_text_input",
-                            "multiline": true,
-                            "action_id": "plain_text_input-action"
-                        },
-                        "label": {
-                            "type": "plain_text",
-                            "text": "Scope / Description",
-                            "emoji": true
-                        }
-                    },
-                    {
-                        "type": "input",
-                        "element": {
-                            "type": "number_input",
-                            "is_decimal_allowed": false,
-                            "action_id": "number_input-action"
-                        },
-                        "label": {
-                            "type": "plain_text",
-                            "text": "Total Price",
-                            "emoji": true
-                        }
-                    },
-                    {
-                        "type": "divider"
+                        "value": "value-2"
                     }
                 ]
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "Vendor",
+                "emoji": true
             }
+        },
+        {
+            "type": "input",
+            "dispatch_action": true,
+            "element": {
+                "type": "static_select",
+                "placeholder": {
+                    "type": "plain_text",
+                    "text": "Select a client",
+                    "emoji": true
+                },
+                "options": [
+                    {
+                        "text": {
+                            "type": "plain_text",
+                            "text": "*plain_text option 0*",
+                            "emoji": true
+                        },
+                        "value": "value-0"
+                    },
+                    {
+                        "text": {
+                            "type": "plain_text",
+                            "text": "*plain_text option 1*",
+                            "emoji": true
+                        },
+                        "value": "value-1"
+                    },
+                    {
+                        "text": {
+                            "type": "plain_text",
+                            "text": "*plain_text option 2*",
+                            "emoji": true
+                        },
+                        "value": "value-2"
+                    }
+                ],
+                "action_id": "client_select"
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "Client",
+                "emoji": true
+            }
+        },
+        {
+            "type": "input",
+            "element": {
+                "type": "static_select",
+                "placeholder": {
+                    "type": "plain_text",
+                    "text": "Select a location",
+                    "emoji": true
+                },
+                "options": [
+                    {
+                        "text": {
+                            "type": "plain_text",
+                            "text": "*plain_text option 0*",
+                            "emoji": true
+                        },
+                        "value": "value-0"
+                    },
+                    {
+                        "text": {
+                            "type": "plain_text",
+                            "text": "*plain_text option 1*",
+                            "emoji": true
+                        },
+                        "value": "value-1"
+                    },
+                    {
+                        "text": {
+                            "type": "plain_text",
+                            "text": "*plain_text option 2*",
+                            "emoji": true
+                        },
+                        "value": "value-2"
+                    }
+                ],
+                "action_id": "location_select"
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "Location",
+                "emoji": true
+            }
+        },
+        {
+            "type": "divider"
+        },
+        {
+            "type": "input",
+            "element": {
+                "type": "plain_text_input",
+                "action_id": "plain_text_input-action"
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "Document ID",
+                "emoji": true
+            }
+        },
+        {
+            "type": "input",
+            "element": {
+                "type": "plain_text_input",
+                "multiline": true,
+                "action_id": "plain_text_input-action"
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "Scope / Description",
+                "emoji": true
+            }
+        },
+        {
+            "type": "input",
+            "element": {
+                "type": "number_input",
+                "is_decimal_allowed": false,
+                "action_id": "number_input-action"
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "Total Price",
+                "emoji": true
+            }
+        },
+        {
+            "type": "divider"
+        }
+    ]
+}
