@@ -138,6 +138,13 @@ class OmegaSlackBot:
         @self.app.command("/doc")
         def handle_doc_command(ack, context):
             ack()
+
+            query = """
+            SELECT * FROM vendors
+            """
+            result = self.db.execute_query(query)
+            print(result)
+
             with open("slackblocks/docprocess_modal.json", "r") as file:
                 modal_json_str = file.read()
                 modal_json = json.loads(modal_json_str)

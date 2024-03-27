@@ -12,4 +12,5 @@ class MessageEvent(plugin_loader.SlackEvent):
         event_data = kwargs.get(self.context["event_data"])
 
     def react(self):
+        self.t = ""
         pass
