@@ -34,6 +34,17 @@ class AppHome:
                             },
                         ],
                     },
+                    {
+                        "type": "input",
+                        "block_id": "input_block_id",
+                        "label": {"type": "plain_text", "text": "Upload Files"},
+                        "element": {
+                            "type": "file_input",
+                            "action_id": "file_input_action_id_1",
+                            "filetypes": ["pdf"],
+                            "max_files": 5,
+                        },
+                    },
                 ],
             },
         }
