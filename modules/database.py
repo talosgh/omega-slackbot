@@ -11,6 +11,7 @@ class Database:
         if cls._instance is None:
             cls._instance = super(Database, cls).__new__(cls)  # Create new instance
             cls._instance.logger = get_logger("Database")
+            cls._instance.logger.info("Initializing Database.")
             # Initialize the connection pool only once
             db_config = {
                 "host": config.get("omega.database.host"),
@@ -50,22 +51,30 @@ class Database:
             raise ConnectionError("Connection pool is not initialized.")
 
     def execute_query(self, query, params=None):
+        result = None  # Initialize result to None to ensure it's defined
         conn = self.get_conn()
         try:
             with conn.cursor() as cursor:
                 cursor.execute(query, params)
                 if query.lower().strip().startswith("select"):
                     result = cursor.fetchall()
+                elif "returning" in query.lower():
+                    fetched = cursor.fetchone()  # Fetch the result
+                    result = (
+                        fetched if fetched is not None else None
+                    )  # Handle None result
                 else:
                     conn.commit()
-                    result = None
-                self.logger.info(f"Executed query: {query}")
-                return result
+            self.logger.info(f"Successfully executed query.")
         except Exception as e:
             conn.rollback()
-            raise e
+            self.logger.error(f"Failed to execute query - Error: {e}")
+            raise e  # Consider whether you want to re-raise or handle differently
         finally:
             self.release_conn(conn)
+
+        # Return the first element of result if it's not None and not empty, otherwise None
+        return result if result else None
 
     def create_tables(self):
         tables_query = """

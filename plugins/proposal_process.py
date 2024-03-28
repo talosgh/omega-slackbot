@@ -3,8 +3,8 @@ from modules.logger import get_logger
 from modules.database import Database
 
 
-class DocProcess(plugin_loader.Parser):
-    _alias_ = "DocProcess"
+class ProposalProcessor(plugin_loader.Parser):
+    _alias_ = "ProposalProcessor"
     _version_ = "0.1"
 
     def __init__(self, **kwargs) -> None:

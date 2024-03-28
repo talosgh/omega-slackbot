@@ -30,13 +30,24 @@ class OmegaSlackBot:
         self.register_event_handlers()
 
     def initialize_plugins(self, path=None):
+        from collections import OrderedDict
+
+        transformed_dict = {}
         self.logger.info(f"Initializing Plugins")
         if path is None:
             path = f"{self.config.get('omega.plugins.directory', 'plugins/')}"
         self.loader = pluginlib.PluginLoader(paths=[path])
         self.plugins = self.loader.plugins
-        for p in self.plugins:
-            self.logger.info(f"Loaded Plugin: {p}")
+
+        for category, plugin_types in self.plugins.items():
+            for plugin_name, plugin_class in plugin_types.items():
+                alias = getattr(plugin_class, "_alias_", plugin_name)
+                version = getattr(plugin_class, "_version_", "unknown")
+                transformed_dict[alias] = version
+        for plugin_alias, version in transformed_dict.items():
+            self.logger.info(
+                f"Loaded Plugin: {plugin_alias} v{version}"
+            )  # Replace print with your logging as needed
 
     def catch_all_events_middleware(self):
         def middleware(context, body, next):
@@ -67,55 +78,21 @@ class OmegaSlackBot:
                 f"Error responding to message in {channel} to {user}: {e}"
             )
 
-    def replace_block_options(self, original_modal, label_text_to_match, new_options):
+    def add_block_options(self, modal, block_id, new_options):
         from copy import deepcopy
 
-        updated_modal = deepcopy(original_modal)
+        updated_modal = deepcopy(modal)
 
-        # Iterate through the blocks to find the target block by its label text
         for block in updated_modal.get("blocks", []):
-            # Check if this block is an input with a static_select element
-            if (
-                block.get("type") == "input"
-                and block.get("element", {}).get("type") == "static_select"
-            ):
-                # Now, check if the label's text matches the provided label_text_to_match
-                if block.get("label", {}).get("text") == label_text_to_match:
-                    # Found the block, now update its options
-                    block["element"]["options"] = new_options
-                    break  # Assuming only one block matches, we can break out of the loop
-
-        return updated_modal
-
-    def add_initial_option(self, original_modal, label_text_to_match, text, value):
-        from copy import deepcopy
-
-        updated_modal = deepcopy(original_modal)
-
-        # Iterate through the blocks to find the target block by its label text
-        for block in updated_modal.get("blocks", []):
-            # Check if this block is an input with a static_select element
-            if (
-                block.get("type") == "input"
-                and block.get("element", {}).get("type") == "static_select"
-            ):
-                # Now, check if the label's text matches the provided label_text_to_match
-                if block.get("label", {}).get("text") == label_text_to_match:
-                    # Found the block, now update its options
-                    block["element"]["initial_option"] = {
-                        "text": {
-                            "type": "plain_text",
-                            "text": text,
-                            "emoji": True,
-                        },
-                        "value": value,
-                    }
-                    break  # Assuming only one block matches, we can break out of the loop
-
+            if block.get("block_id") == block_id:
+                block["element"]["options"] = new_options
+                break
         return updated_modal
 
     def register_event_handlers(self):
-
+        self.plugins.parser.FileToDatabase().parse(
+            file="Documents/Downloads/sample.pdf", db=self.db
+        )
         self.logger.info(f"Registering Event Handlers and Starting Omega Slackbot")
 
         @self.app.event("app_mention")
@@ -206,9 +183,7 @@ class OmegaSlackBot:
                 modal_json_str = file.read()
                 modal_json = json.loads(modal_json_str)
 
-            vendor_modal = self.replace_block_options(
-                modal_json, "Vendor", vendor_options
-            )
+            vendor_modal = self.add_block_options(modal_json, "vendor", vendor_options)
             self.app.client.views_open(
                 trigger_id=context["event_data"]["command"].get("trigger_id"),
                 view=vendor_modal,
@@ -239,15 +214,7 @@ class OmegaSlackBot:
                 for owner in owners
             ]
 
-            updated_modal = self.replace_block_options(
-                self.vmodal, "Client", owner_options
-            )
-            self.omodel = self.add_initial_option(
-                updated_modal,
-                "Vendor",
-                self.selected_vendor_name,
-                self.selected_vendor_id,
-            )
+            self.omodel = self.add_block_options(self.vmodal, "client", owner_options)
 
             self.app.client.views_update(
                 view_id=body["view"]["id"],
@@ -258,7 +225,6 @@ class OmegaSlackBot:
         @self.app.action("client_select")
         def handle_owner_selection(ack, body, action):
             ack()
-            print(action)
             self.selected_owner_name = action["selected_option"]["text"]["text"]
             self.selected_owner_id = action["selected_option"]["value"]
             locations_query = """
@@ -283,27 +249,64 @@ class OmegaSlackBot:
                 for location in locations
             ]
 
-            updated_modal = self.replace_block_options(
-                self.omodel, "Location", location_options
-            )
-
-            self.lmodel = self.add_initial_option(
-                updated_modal,
-                "Client",
-                self.selected_owner_name,
-                self.selected_owner_id,
+            updated_modal = self.add_block_options(
+                self.omodel, "location", location_options
             )
 
             self.app.client.views_update(
                 view_id=body["view"]["id"],
                 hash=body["view"]["hash"],
-                view=self.lmodel,
+                view=updated_modal,
             )
 
-        @self.app.action("hello")
-        def handle_hello(ack):
+        @self.app.view("doc_process")
+        def handle_doc_process_submission(ack, body, view):
+            self.logger.info(f"Processing Invoice Submission...")
+
+            state = body["state"]
+            user_id = body["user"]["id"]
+
+            print(state)
+            for file_info in state["files"]:
+                try:
+                    download_filename = self.plugins.files.FileHandler(
+                        app=self.app,
+                        config=self.config,
+                    ).download(
+                        user=state["user"].get("full_name"),
+                        file_name=file_info["name"],
+                        file_url=file_info["url_private_download"],
+                    )
+                    filenames = self.plugins.parser.FileParser(
+                        file=download_filename
+                    ).parse()
+                    for filename in getattr(filenames, "filenames", []):
+                        self.plugins.parser.file_handler.send(filename)
+                except Exception as e:
+                    self.logger.error(f"Error processing file: {e}")
+                zipfile = self.plugins.parser.Zipper().parse(
+                    documents_directory=self.config.get("omega.documents.directory"),
+                    filenames=filenames,
+                    download_filename=download_filename,
+                    user=state["user"].get("full_name"),
+                )
+                self.respond_quietly(
+                    state["user"].get("id"),
+                    state["event"].get("channel_id"),
+                    f"Files processed: {filenames}",
+                )
+                self.plugins.files.FileHandler(
+                    app=self.app,
+                    config=self.config,
+                    file_name=zipfile,
+                    file_url=zipfile,
+                ).upload(
+                    channel=state["event"].get("channel_id"),
+                    file=zipfile,
+                )
+                os.remove(zipfile)
+
             ack()
-            print("Hello")
 
 
 if __name__ == "__main__":

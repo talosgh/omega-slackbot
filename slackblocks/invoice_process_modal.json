@@ -1,6 +1,6 @@
 {
     "type": "modal",
-    "callback_id": "doc_process_modal",
+    "callback_id": "doc_process",
     "title": {
         "type": "plain_text",
         "text": "Document Processing",
@@ -19,7 +19,7 @@
     "blocks": [
         {
             "type": "input",
-            "block_id": "input_block_id",
+            "block_id": "file_upload",
             "label": {
                 "type": "plain_text",
                 "text": "Upload Files"
@@ -38,6 +38,7 @@
         },
         {
             "type": "input",
+            "block_id": "originator",
             "element": {
                 "type": "plain_text_input",
                 "action_id": "plain_text_input-action"
@@ -49,41 +50,12 @@
             }
         },
         {
-            "type": "input",
-            "element": {
-                "type": "radio_buttons",
-                "options": [
-                    {
-                        "text": {
-                            "type": "plain_text",
-                            "text": "Invoice",
-                            "emoji": true
-                        },
-                        "value": "invoice"
-                    },
-                    {
-                        "text": {
-                            "type": "plain_text",
-                            "text": "Proposal",
-                            "emoji": true
-                        },
-                        "value": "proposal"
-                    }
-                ],
-                "action_id": "radio_buttons-action"
-            },
-            "label": {
-                "type": "plain_text",
-                "text": "Document Type",
-                "emoji": true
-            }
-        },
-        {
             "type": "divider"
         },
         {
             "type": "input",
             "dispatch_action": true,
+            "block_id": "vendor",
             "element": {
                 "type": "static_select",
                 "action_id": "vendor_select",
@@ -128,6 +100,7 @@
         {
             "type": "input",
             "dispatch_action": true,
+            "block_id": "client",
             "element": {
                 "type": "static_select",
                 "placeholder": {
@@ -171,6 +144,7 @@
         },
         {
             "type": "input",
+            "block_id": "location",
             "element": {
                 "type": "static_select",
                 "placeholder": {
@@ -217,6 +191,7 @@
         },
         {
             "type": "input",
+            "block_id": "doc_id",
             "element": {
                 "type": "plain_text_input",
                 "action_id": "plain_text_input-action"
@@ -229,6 +204,7 @@
         },
         {
             "type": "input",
+            "block_id": "scope",
             "element": {
                 "type": "plain_text_input",
                 "multiline": true,
@@ -242,6 +218,7 @@
         },
         {
             "type": "input",
+            "block_id": "cost",
             "element": {
                 "type": "number_input",
                 "is_decimal_allowed": false,
