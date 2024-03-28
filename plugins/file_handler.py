@@ -1,7 +1,6 @@
 import modules.plugin_loader as plugin_loader
 import os
 from modules.logger import get_logger
-from modules.database import Database
 import requests
 
 
@@ -21,11 +20,13 @@ class FileHandler(plugin_loader.FileHandling):
         self.download_folder = os.path.join(self.documents_path, self.download_path)
 
     def download(self, **kwargs):
-        user = kwargs.get("user")
-        file_name = kwargs.get("file_name")
+        from urllib.parse import urlparse
+        import os
+
         file_url = kwargs.get("file_url")
-        os.makedirs(self.download_folder, exist_ok=True)
+        file_name = os.path.basename(urlparse(file_url).path)
         download_filename = os.path.join(self.download_folder, file_name)
+
         try:
             response = requests.get(
                 file_url,
@@ -35,16 +36,8 @@ class FileHandler(plugin_loader.FileHandling):
             response.raise_for_status()
             with open(download_filename, "wb") as file:
                 file.write(response.content)
-
             self.logger.info(f"File saved as: {download_filename}")
-            db = Database(self.config)
-            query = "INSERT INTO doc_dump (file, user_id) VALUES (%s, %s)"
-            params = (
-                download_filename,
-                user,
-            )
-            db.execute_query(query, params)
-            self.logger.info(f"File saved to database: {download_filename}")
+            # db here
             return download_filename
         except Exception as e:
             self.logger.error(f"Error downloading file: {e}")
