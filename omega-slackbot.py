@@ -1,11 +1,10 @@
 #!.venv/bin/python
 import slack_bolt as bolt
 import json
+import tempfile
 import os
-from zipfile import ZipFile
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 import pluginlib
-from pandas import DataFrame
 
 import modules as omega
 
@@ -16,18 +15,18 @@ class OmegaSlackBot:
         self.config = omega.OmegaConfiguration()
         self.logger = omega.get_logger(self.name)
         self.logger.info(f"Logger Initialized")
+        self.temp_dir = tempfile.mkdtemp(prefix="omega_")
+        self.logger.info(f"Temp Directory Created: {self.temp_dir}")
         self.db = omega.Database(self.config)
         self.initialize_plugins()
-        self.plugins.parser.Directory(
-            paths=[
-                self.config.get("omega.documents.directory"),
-                self.config.get("omega.documents.download_directory"),
-            ]
-        ).parse(),
         self.logger.info(f"Creating Slack Instance")
         self.app = bolt.App(token=self.config.get("slack.bot_token"))
         self.app.use(self.catch_all_events_middleware())
         self.register_event_handlers()
+
+    def __del__(self):
+        self.logger.info(f"Deleting Temp Directory: {self.temp_dir}")
+        os.rmdir(self.temp_dir)
 
     def initialize_plugins(self, path=None):
         from collections import OrderedDict

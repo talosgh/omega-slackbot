@@ -25,6 +25,7 @@ class SlackFileInfo(plugin_loader.Parser):
                     "size": file_info.get("size", None),
                 }
             )
+            self.logger.info(f"Retrieved file info for {file_info.get('name')}")
         except Exception as e:
             self.logger.error(f"Failed to get user info: {e}")
             return None

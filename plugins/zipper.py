@@ -15,7 +15,7 @@ class Zipper(plugin_loader.Parser):
         from zipfile import ZipFile
         from pathlib import Path
 
-        documents_directory = kwargs.get("documents_directory", "Documents/")
+        documents_directory = kwargs.get("temp_dir")
         filenames = kwargs.get("filenames", None)
         download_filename = kwargs.get("download_filename", None)
         user = kwargs.get("username", "")
@@ -25,7 +25,7 @@ class Zipper(plugin_loader.Parser):
         if not filenames:
             return
 
-        zipfile = documents_directory + "/" + user + filestem + ".zip"
+        zipfile = documents_directory + "/" + user + "-" + filestem + ".zip"
         with ZipFile(zipfile, "w") as zip:
             for filename in filenames:
                 zip.write(filename, arcname=os.path.basename(filename))

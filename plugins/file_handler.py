@@ -20,12 +20,15 @@ class FileHandler(plugin_loader.FileHandling):
         self.download_folder = os.path.join(self.documents_path, self.download_path)
 
     def download(self, **kwargs):
+        """
+        Download a file from a URL
+        :param file_url: URL of the file to download
+        :return: Path to the downloaded file
+        """
         from urllib.parse import urlparse
-        import os
+        import tempfile
 
         file_url = kwargs.get("file_url")
-        file_name = os.path.basename(urlparse(file_url).path)
-        download_filename = os.path.join(self.download_folder, file_name)
 
         try:
             response = requests.get(
@@ -34,16 +37,22 @@ class FileHandler(plugin_loader.FileHandling):
                 headers={"Authorization": f"Bearer {self.bot_token}"},
             )
             response.raise_for_status()
-            with open(download_filename, "wb") as file:
-                file.write(response.content)
-            self.logger.info(f"File saved as: {download_filename}")
-            # db here
-            return download_filename
+
+            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                temp_file.write(response.content)
+                self.logger.info(f"Data written to temporary file: {temp_file.name}")
+                return temp_file.name
+
         except Exception as e:
             self.logger.error(f"Error downloading file: {e}")
             return None
 
     def upload(self, **kwargs):
+        """
+        Upload a file to a Slack channel
+        :param channel: Slack channel ID
+        :param file: Path to file to upload
+        """
         channel = kwargs.get("channel")
         file_name = kwargs.get("file")
         try:

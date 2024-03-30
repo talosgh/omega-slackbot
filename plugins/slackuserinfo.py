@@ -16,13 +16,15 @@ class SlackUserInfo(plugin_loader.Parser):
                 user=self.kwargs.get("user_id")
             )
             userdata = response.get("profile", {})
+            userinfo = {
+                "user_id": userdata.get("id", None),
+                "user_fname": userdata.get("first_name", None),
+                "user_lname": userdata.get("last_name", None),
+                "user_fullname": userdata.get("real_name", None),
+                "user_email": userdata.get("email", None),
+            }
+            self.logger.info(f"Retrieved user info for {userinfo.get("user_fullname")}")
         except Exception as e:
             self.logger.error(f"Failed to get user info: {e}")
             return None
-        return {
-            "user_id": userdata.get("id", None),
-            "user_fname": userdata.get("first_name", None),
-            "user_lname": userdata.get("last_name", None),
-            "user_fullname": userdata.get("real_name", None),
-            "user_email": userdata.get("email", None),
-        }
+        return userinfo

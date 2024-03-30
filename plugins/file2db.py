@@ -13,6 +13,7 @@ class FileToDatabase(plugin_loader.Parser):
         """Save file to database
         Args:
             file (str): File path
+            db (obj): Database object
         """
         import hashlib
         import os
