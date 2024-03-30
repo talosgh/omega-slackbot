@@ -16,7 +16,7 @@ class SlackEventInfo(plugin_loader.Parser):
             channel = response.get("channel", {})
 
         except Exception as e:
-            self.logger.error(f"Failed to get channel info: {e}")
+            self.logger.error(f"Failed to get event info: {e}")
             return None
         return {
             "channel_id": channel.get("id", None),

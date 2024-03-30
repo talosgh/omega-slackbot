@@ -11,6 +11,12 @@ class EventLogger(plugin_loader.EventLogger):
     _version_ = "1.0"
 
     def __init__(self, body, app, db) -> None:
+        """
+        Initialize the EventLogger class
+        :param body: The body of the event
+        :param app: The Slack app object
+        :param db: The database object
+        """
         self.logger = get_logger(self._alias_)
         self.body = body
         self.app = app
