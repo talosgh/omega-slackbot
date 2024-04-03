@@ -11,7 +11,7 @@ class SlackFileInfo(plugin_loader.Parser):
         self.files = []
 
     def parse(self, **kwargs):
-        self.logger.info(f"Getting file info for {kwargs.get("file_id")}")
+        self.logger.info(f"Getting file info for {kwargs.get('file_id')}")
         try:
             file_info_response = self.app.client.files_info(file=kwargs.get("file_id"))
             file_info = file_info_response.get("file", {})

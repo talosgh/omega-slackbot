@@ -10,7 +10,7 @@ class SlackEventInfo(plugin_loader.Parser):
         self.logger = get_logger(self._alias_)
 
     def parse(self, **kwargs):
-        self.logger.info(f"Getting channel info for {kwargs.get("channel_id")}")
+        self.logger.info(f"Getting channel info for {kwargs.get('channel_id')}")
         try:
             response = self.app.client.conversations_info(kwargs.get("channel_id"))
             channel = response.get("channel", {})
@@ -20,5 +20,5 @@ class SlackEventInfo(plugin_loader.Parser):
             return None
         return {
             "channel_id": channel.get("id", None),
-            "channel_name": channel.get("name", None)
+            "channel_name": channel.get("name", None),
         }
