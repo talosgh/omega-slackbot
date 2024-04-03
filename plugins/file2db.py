@@ -67,5 +67,5 @@ class FileToDatabase(plugin_loader.Parser):
                     )
                     return None
         except Exception as e:
-            self.logger.error(f"Error processing file: {e}")
+            self.logger.error(f"Error processing the file: {e}")
             return None
