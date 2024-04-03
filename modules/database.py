@@ -19,6 +19,7 @@ class Database:
                 "database": config.get("omega.database.database"),
                 "user": config.get("omega.database.user"),
                 "password": config.get("omega.database.password"),
+                "sslmode": "require",
             }
 
             if db_config is None:
