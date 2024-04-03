@@ -8,7 +8,7 @@ numpy==1.26.4
 packaging==24.0
 pandas==2.2.1
 pdf2image==1.17.0
-pillow==10.2.0
+pillow==10.3.0
 pluginlib==0.9.1
 psycopg2-binary==2.9.9
 pycparser==2.21
