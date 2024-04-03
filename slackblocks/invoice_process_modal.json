@@ -1,9 +1,9 @@
 {
     "type": "modal",
-    "callback_id": "doc_process",
+    "callback_id": "invoice_process",
     "title": {
         "type": "plain_text",
-        "text": "Document Processing",
+        "text": "Invoice Processing",
         "emoji": true
     },
     "submit": {
