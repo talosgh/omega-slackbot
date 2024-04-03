@@ -164,7 +164,7 @@ class OmegaSlackBot:
 
             # self.plugins.parser.DocProcess(context=context, app=self.app).process()
 
-        @self.app.command("/doc")
+        @self.app.command("/invoice")
         def handle_doc_command(ack, context):
             ack()
             vendors = self.db.execute_query(query="SELECT * FROM vendors")
@@ -178,7 +178,7 @@ class OmegaSlackBot:
                 }
                 for vendor in vendors
             ]
-            with open("slackblocks/docprocess_modal.json", "r") as file:
+            with open("slackblocks/invoice_process_modal.json", "r") as file:
                 modal_json_str = file.read()
                 modal_json = json.loads(modal_json_str)
 
