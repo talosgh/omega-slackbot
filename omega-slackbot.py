@@ -158,14 +158,14 @@ class OmegaSlackBot:
             homeview_handler = omega.AppHome(context, self.db)
             self.app.client.views_publish(**homeview_handler.homeview)
 
-        @self.app.view("doc_process_modal")
-        def handle_modal_submission(ack, context):
+        @self.app.view("invoice_process_modal")
+        def handle_invoice_submission(ack, context):
             ack()
 
             # self.plugins.parser.DocProcess(context=context, app=self.app).process()
 
         @self.app.command("/invoice")
-        def handle_doc_command(ack, context):
+        def handle_invoice_command(ack, context):
             ack()
             vendors = self.db.execute_query(query="SELECT * FROM vendors")
             vendor_options = [
