@@ -258,11 +258,11 @@ class OmegaSlackBot:
                 view=updated_modal,
             )
 
-        @self.app.view("invoice_process")
-        def handle_invoice_process_submission(ack, body, view):
+        @self.app.view("doc_process")
+        def handle_doc_process_submission(ack, body, view):
             """Handle the submission of the invoice processing modal."""
             self.logger.info(f"Processing Invoice Submission...")
-            print(state)
+            print(body)
             state = body["view"]["state"]
             user_id = body["user"]["id"]
 
