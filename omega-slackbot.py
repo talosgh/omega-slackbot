@@ -242,7 +242,7 @@ class OmegaSlackBot:
                 }
                 for vendor in vendors
             ]
-            with open("slackblocks/invoice_process_modal.json", "r") as file:
+            with open("slackblocks/proposal_process_modal.json", "r") as file:
                 modal_json_str = file.read()
                 modal_json = json.loads(modal_json_str)
 
