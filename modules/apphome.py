@@ -36,7 +36,7 @@ class AppHome:
                         }
                     )
 
-            # Define the home view structure with corrected section block for button
+            # Define the home view structure with corrected section block for buttons
             home_view = {
                 "user_id": self.user,
                 "view": {
