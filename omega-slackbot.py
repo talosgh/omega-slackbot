@@ -5,6 +5,9 @@ import tempfile
 import os
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 import pluginlib
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
+import shutil
 
 import modules as omega
 
@@ -15,8 +18,6 @@ class OmegaSlackBot:
         self.config = omega.OmegaConfiguration()
         self.logger = omega.get_logger(self.name)
         self.logger.info(f"Logger Initialized")
-        self.temp_dir = tempfile.mkdtemp(prefix="omega_")
-        self.logger.info(f"Temp Directory Created: {self.temp_dir}")
         self.db = omega.Database(self.config)
         self.initialize_plugins()
         self.logger.info(f"Creating Slack Instance")
@@ -59,6 +60,49 @@ class OmegaSlackBot:
 
         return middleware
 
+    def send_private_message_with_file(
+        self,
+        client: WebClient,
+        username: str,
+        user_id: str,
+        message: str,
+        file_path: str,
+    ):
+        """
+        Send a private message to a user with a file attachment.
+        Args:
+            client (WebClient): The Slack WebClient instance
+            username (str): The username of the user to send the message to
+            user_id (str): The user ID of the user to send the message to
+            message (str): The message to send to the user
+            file_path (str): The path to the file to send
+        """
+
+        if user_id is not None:
+            try:
+                # Open a conversation with the user
+                conversation_response = client.conversations_open(users=[user_id])
+                channel_id = conversation_response["channel"]["id"]
+
+                # Post a message to the user, if there's a message to send
+                if message:
+                    client.chat_postMessage(channel=channel_id, text=message)
+
+                # Upload a file to the conversation
+                with open(file_path, "rb") as file_content:
+                    client.files_upload_v2(
+                        channels=channel_id,
+                        file=file_content,
+                        filename=os.path.basename(file_path),
+                        initial_comment="Here's your file!",  # Optional: Adds a comment to the file upload
+                    )
+
+                print(f"File sent to {username}")
+            except SlackApiError as e:
+                print(f"Error sending file: {e}")
+        else:
+            print(f"User {username} not found.")
+
     def respond_quietly(self, user, channel, response_str):
         try:
             self.app.client.chat_postEphemeral(
@@ -89,9 +133,9 @@ class OmegaSlackBot:
         return updated_modal
 
     def register_event_handlers(self):
-        self.plugins.parser.FileToDatabase().parse(
-            file="Documents/Downloads/sample.pdf", db=self.db
-        )
+        # self.plugins.parser.FileToDatabase().parse(
+        #    file="Documents/Downloads/sample.pdf", db=self.db
+        # )
         self.logger.info(f"Registering Event Handlers and Starting Omega Slackbot")
 
         @self.app.event("app_mention")
@@ -124,7 +168,7 @@ class OmegaSlackBot:
                 except Exception as e:
                     self.logger.error(f"Error processing file: {e}")
                 zipfile = self.plugins.parser.Zipper().parse(
-                    documents_directory=self.config.get("omega.documents.directory"),
+                    documents_directory=self.config.get(self.temp_dir),
                     filenames=filenames,
                     download_filename=download_filename,
                     user=event_data["user"].get("full_name"),
@@ -158,13 +202,33 @@ class OmegaSlackBot:
             homeview_handler = omega.AppHome(context, self.db)
             self.app.client.views_publish(**homeview_handler.homeview)
 
-        @self.app.view("invoice_process_modal")
-        def handle_invoice_submission(ack, context):
-            ack()
-
-            # self.plugins.parser.DocProcess(context=context, app=self.app).process()
-
         @self.app.command("/invoice")
+        def handle_invoice_command(ack, context):
+            ack()
+            vendors = self.db.execute_query(query="SELECT * FROM vendors")
+            vendor_options = [
+                {
+                    "text": {
+                        "type": "plain_text",
+                        "text": vendor[1],
+                    },
+                    "value": str(vendor[0]),
+                }
+                for vendor in vendors
+            ]
+            with open("slackblocks/invoice_process_modal.json", "r") as file:
+                modal_json_str = file.read()
+                modal_json = json.loads(modal_json_str)
+
+            vendor_modal = self.add_block_options(modal_json, "vendor", vendor_options)
+            self.app.client.views_open(
+                trigger_id=context["event_data"]["command"].get("trigger_id"),
+                view=vendor_modal,
+            )
+
+            self.vmodal = vendor_modal
+
+        @self.app.command("/proposal")
         def handle_invoice_command(ack, context):
             ack()
             vendors = self.db.execute_query(query="SELECT * FROM vendors")
@@ -258,55 +322,121 @@ class OmegaSlackBot:
                 view=updated_modal,
             )
 
-        @self.app.view("doc_process")
-        def handle_doc_process_submission(ack, body, view):
+        @self.app.view("invoice_process")
+        def handle_invoice_process_submission(ack, body, view):
+            ack()
             """Handle the submission of the invoice processing modal."""
             self.logger.info(f"Processing Invoice Submission...")
-            print(body)
-            state = body["view"]["state"]
+            filedata = body["view"]["state"]["values"]["file_upload"][
+                "file_input_action_id_1"
+            ]["files"]
             user_id = body["user"]["id"]
+            user_name = body["user"]["name"]
 
-            print(state)
-            for file_info in state["files"]:
+            for file_info in filedata:
                 try:
-                    download_filename = self.plugins.files.FileHandler(
+                    download_filename, dl_dir = self.plugins.files.FileHandler(
                         app=self.app,
                         config=self.config,
                     ).download(
-                        user=state["user"].get("full_name"),
+                        user=file_info["user"],
                         file_name=file_info["name"],
                         file_url=file_info["url_private_download"],
                     )
-                    filenames = self.plugins.parser.FileParser(
+
+                    db_insert = self.plugins.parser.FileToDatabase().parse(
+                        file=download_filename,
+                        ofile=file_info["name"],
+                        username=user_name,
+                        user_id=user_id,
+                        db=self.db,
+                        tag="invoice",
+                    )
+                    self.logger.info(
+                        f"{download_filename} downloaded and inserted into DB as {db_insert}"
+                    )
+
+                    self.logger.info(f"Parsing file: {download_filename}")
+                    filenames, parse_dir = self.plugins.parser.FileParser(
                         file=download_filename
                     ).parse()
-                    for filename in getattr(filenames, "filenames", []):
-                        self.plugins.parser.file_handler.send(filename)
+                    self.logger.info(f"Parsing complete - output: {filenames}")
+
                 except Exception as e:
                     self.logger.error(f"Error processing file: {e}")
-                zipfile = self.plugins.parser.Zipper().parse(
-                    documents_directory=self.config.get("omega.documents.directory"),
-                    filenames=filenames,
-                    download_filename=download_filename,
-                    user=state["user"].get("full_name"),
-                )
-                self.respond_quietly(
-                    state["user"].get("id"),
-                    state["event"].get("channel_id"),
-                    f"Files processed: {filenames}",
-                )
-                self.plugins.files.FileHandler(
-                    app=self.app,
-                    config=self.config,
-                    file_name=zipfile,
-                    file_url=zipfile,
-                ).upload(
-                    channel=state["event"].get("channel_id"),
-                    file=zipfile,
-                )
-                os.remove(zipfile)
 
+            zipfile = self.plugins.parser.Zipper().parse(
+                filenames=filenames,
+                temp_dir=parse_dir,
+                download_filename=download_filename,
+                username=user_name,
+            )
+
+            message = "Invoice Files processed: {filenames}"
+            client = self.app.client
+            self.send_private_message_with_file(
+                client, user_name, user_id, message, zipfile
+            )
+            shutil.rmtree(dl_dir, ignore_errors=True)
+            shutil.rmtree(parse_dir, ignore_errors=True)
+
+        @self.app.view("proposal_process")
+        def handle_proposal_process_submission(ack, body, view):
             ack()
+            """Handle the submission of the invoice processing modal. """
+            self.logger.info(f"Processing Proposal Submission...")
+            filedata = body["view"]["state"]["values"]["file_upload"][
+                "file_input_action_id_1"
+            ]["files"]
+            user_id = body["user"]["id"]
+            user_name = body["user"]["name"]
+
+            for file_info in filedata:
+                try:
+                    download_filename, dl_dir = self.plugins.files.FileHandler(
+                        app=self.app,
+                        config=self.config,
+                    ).download(
+                        user=file_info["user"],
+                        file_name=file_info["name"],
+                        file_url=file_info["url_private_download"],
+                    )
+
+                    db_insert = self.plugins.parser.FileToDatabase().parse(
+                        file=download_filename,
+                        ofile=file_info["name"],
+                        username=user_name,
+                        user_id=user_id,
+                        db=self.db,
+                        tag="proposal",
+                    )
+                    self.logger.info(
+                        f"{download_filename} downloaded and inserted into DB as {db_insert}"
+                    )
+
+                    self.logger.info(f"Parsing file: {download_filename}")
+                    filenames, parse_dir = self.plugins.parser.FileParser(
+                        file=download_filename
+                    ).parse()
+                    self.logger.info(f"Parsing complete - output: {filenames}")
+
+                except Exception as e:
+                    self.logger.error(f"Error processing file: {e}")
+
+            zipfile = self.plugins.parser.Zipper().parse(
+                filenames=filenames,
+                temp_dir=parse_dir,
+                download_filename=download_filename,
+                username=user_name,
+            )
+
+            message = "Proposal Files processed: {filenames}"
+            client = self.app.client
+            self.send_private_message_with_file(
+                client, user_name, user_id, message, zipfile
+            )
+            shutil.rmtree(dl_dir, ignore_errors=True)
+            shutil.rmtree(parse_dir, ignore_errors=True)
 
 
 if __name__ == "__main__":

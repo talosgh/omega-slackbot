@@ -14,6 +14,13 @@ class InvoiceProcessor(plugin_loader.Parser):
         self.db = Database()
 
     def parse(self, **kwargs):
+        """Process invoice form submission
+        Args:
+            body (dict): Request body
+        Returns:
+            dict: Response
+        """
+
         self.ack()
         body = kwargs.get("body")
 

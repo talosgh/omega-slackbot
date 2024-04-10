@@ -10,6 +10,12 @@ class SlackUserInfo(plugin_loader.Parser):
         self.logger = get_logger(self._alias_)
 
     def parse(self, **kwargs):
+        """Get user information from Slack
+        Args:
+            user_id (str): User ID
+        Returns:
+            dict: User information
+        """
         self.logger.info(f"Getting user info for {self.kwargs.get('user_id')}")
         try:
             response = self.app.client.users_profile_get(

@@ -10,6 +10,13 @@ class SlackStateInfo(plugin_loader.Parser):
         self.logger = get_logger(self._alias_)
 
     def parse(self, **kwargs):
+        """Get state information from Slack
+        Args:
+            view (dict): View object
+        Returns:
+            dict: State information
+        """
+
         self.logger.info(f"Getting state info for modal submission")
         f = []
         try:

@@ -29,6 +29,8 @@ class FileHandler(plugin_loader.FileHandling):
         import tempfile
 
         file_url = kwargs.get("file_url")
+        file_name = os.path.basename(urlparse(file_url).path)
+        temp_dir = tempfile.mkdtemp()
 
         try:
             response = requests.get(
@@ -38,10 +40,10 @@ class FileHandler(plugin_loader.FileHandling):
             )
             response.raise_for_status()
 
-            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-                temp_file.write(response.content)
-                self.logger.info(f"Data written to temporary file: {temp_file.name}")
-                return temp_file.name
+            with open(os.path.join(temp_dir, file_name), "wb+") as f:
+                f.write(response.content)
+            self.logger.info(f"Data written to temporary file: {temp_dir}/{file_name}")
+            return os.path.join(temp_dir, file_name), temp_dir
 
         except Exception as e:
             self.logger.error(f"Error downloading file: {e}")

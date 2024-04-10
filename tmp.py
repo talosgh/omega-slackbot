@@ -1,4 +1,106 @@
 {
+    "values": {
+        "file_upload": {
+            "file_input_action_id_1": {
+                "type": "file_input",
+                "files": [
+                    {
+                        "id": "F06TAC0KTD4",
+                        "created": 1712675491,
+                        "timestamp": 1712675491,
+                        "name": "780 3 AVENUE.pdf",
+                        "title": "780 3 AVENUE.pdf",
+                        "mimetype": "application/pdf",
+                        "filetype": "pdf",
+                        "pretty_type": "PDF",
+                        "user": "UGFL0UGGN",
+                        "user_team": "T0331TJV7",
+                        "editable": False,
+                        "size": 6545778,
+                        "mode": "hosted",
+                        "is_external": False,
+                        "external_type": "",
+                        "is_public": False,
+                        "public_url_shared": False,
+                        "display_as_bot": False,
+                        "username": "",
+                        "url_private": "https://files.slack.com/files-pri/T0331TJV7-F06TAC0KTD4/780_3_avenue.pdf",
+                        "url_private_download": "https://files.slack.com/files-pri/T0331TJV7-F06TAC0KTD4/download/780_3_avenue.pdf",
+                        "media_display_type": "unknown",
+                        "thumb_pdf": "https://files.slack.com/files-tmb/T0331TJV7-F06TAC0KTD4-02b85762b2/780_3_avenue_thumb_pdf.png",
+                        "thumb_pdf_w": 1928,
+                        "thumb_pdf_h": 1980,
+                        "permalink": "https://gravityholdings.slack.com/files/UGFL0UGGN/F06TAC0KTD4/780_3_avenue.pdf",
+                        "permalink_public": "https://slack-files.com/T0331TJV7-F06TAC0KTD4-34fbfcb868",
+                        "comments_count": 0,
+                        "shares": {},
+                        "channels": [],
+                        "groups": [],
+                        "ims": [],
+                        "has_more_shares": False,
+                        "has_rich_preview": False,
+                        "file_access": "visible",
+                    }
+                ],
+            }
+        },
+        "originator": {
+            "plain_text_input-action": {"type": "plain_text_input", "value": "asd"}
+        },
+        "vendor": {
+            "vendor_select": {
+                "type": "static_select",
+                "selected_option": {
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Delaware-ELV",
+                        "emoji": True,
+                    },
+                    "value": "5",
+                },
+            }
+        },
+        "client": {
+            "client_select": {
+                "type": "static_select",
+                "selected_option": {
+                    "text": {
+                        "type": "plain_text",
+                        "text": "EOS Hospitality",
+                        "emoji": True,
+                    },
+                    "value": "12",
+                },
+            }
+        },
+        "location": {
+            "location_select": {
+                "type": "static_select",
+                "selected_option": {
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Oceans Edge Resort Hotel - 5950 Peninsular Avenue",
+                        "emoji": True,
+                    },
+                    "value": "1439",
+                },
+            }
+        },
+        "doc_id": {
+            "plain_text_input-action": {"type": "plain_text_input", "value": "asd"}
+        },
+        "scope": {
+            "plain_text_input-action": {"type": "plain_text_input", "value": "asd"}
+        },
+        "cost": {"number_input-action": {"type": "number_input", "value": "1"}},
+    }
+}
+
+
+#############
+
+
+{
     "type": "view_submission",
     "team": {"id": "T0331TJV7", "domain": "gravityholdings"},
     "user": {
@@ -9,9 +111,9 @@
     },
     "api_app_id": "A06KV1TBUEQ",
     "token": "Qbah0gCbFZIlV5s3cWf3BRDc",
-    "trigger_id": "6862236807559.3103936993.04e3e1fa9aa227cec72ca40ac9d3d06e",
+    "trigger_id": "6920524839383.3103936993.4e733763056de97f6509a8a52359343a",
     "view": {
-        "id": "V06RPRV95E1",
+        "id": "V06TVLQKJ1F",
         "team_id": "T0331TJV7",
         "type": "modal",
         "blocks": [
@@ -29,7 +131,7 @@
                     "max_file_size_bytes": 10000000,
                 },
             },
-            {"type": "divider", "block_id": "fpLig"},
+            {"type": "divider", "block_id": "KUJ9Y"},
             {
                 "type": "input",
                 "block_id": "originator",
@@ -44,7 +146,7 @@
                     },
                 },
             },
-            {"type": "divider", "block_id": "klLcC"},
+            {"type": "divider", "block_id": "0ROWz"},
             {
                 "type": "input",
                 "block_id": "vendor",
@@ -341,14 +443,6 @@
                         {
                             "text": {
                                 "type": "plain_text",
-                                "text": "Nuveen",
-                                "emoji": True,
-                            },
-                            "value": "24",
-                        },
-                        {
-                            "text": {
-                                "type": "plain_text",
                                 "text": "Starwood Capital Group",
                                 "emoji": True,
                             },
@@ -375,15 +469,15 @@
                         {
                             "text": {
                                 "type": "plain_text",
-                                "text": "Rosslyn Overlook - 1616 North Fort Myer Drive",
+                                "text": "Oceans Edge Resort Hotel - 5950 Peninsular Avenue",
                                 "emoji": True,
                             },
-                            "value": "493",
+                            "value": "1439",
                         }
                     ],
                 },
             },
-            {"type": "divider", "block_id": "XVd6O"},
+            {"type": "divider", "block_id": "I1AFx"},
             {
                 "type": "input",
                 "block_id": "doc_id",
@@ -429,29 +523,29 @@
                     "is_decimal_allowed": False,
                 },
             },
-            {"type": "divider", "block_id": "Fbg0j"},
+            {"type": "divider", "block_id": "QpfEZ"},
         ],
         "private_metadata": "",
-        "callback_id": "doc_process",
+        "callback_id": "invoice_process",
         "state": {
             "values": {
                 "file_upload": {
-                    "file_input_action_id_1": {
+                    ["file_input_action_id_1"]: {
                         "type": "file_input",
                         "files": [
                             {
-                                "id": "F06RL4U69M4",
-                                "created": 1711627229,
-                                "timestamp": 1711627229,
-                                "name": "29n-130sfpp-6cars-CIBSE-UP-80-20-20.pdf",
-                                "title": "29n-130sfpp-6cars-CIBSE-UP-80-20-20.pdf",
+                                "id": "F06TAC0KTD4",
+                                "created": 1712675491,
+                                "timestamp": 1712675491,
+                                "name": "780 3 AVENUE.pdf",
+                                "title": "780 3 AVENUE.pdf",
                                 "mimetype": "application/pdf",
                                 "filetype": "pdf",
                                 "pretty_type": "PDF",
                                 "user": "UGFL0UGGN",
                                 "user_team": "T0331TJV7",
                                 "editable": False,
-                                "size": 1093938,
+                                "size": 6545778,
                                 "mode": "hosted",
                                 "is_external": False,
                                 "external_type": "",
@@ -459,14 +553,14 @@
                                 "public_url_shared": False,
                                 "display_as_bot": False,
                                 "username": "",
-                                "url_private": "https://files.slack.com/files-pri/T0331TJV7-F06RL4U69M4/29n-130sfpp-6cars-cibse-up-80-20-20.pdf",
-                                "url_private_download": "https://files.slack.com/files-pri/T0331TJV7-F06RL4U69M4/download/29n-130sfpp-6cars-cibse-up-80-20-20.pdf",
+                                "url_private": "https://files.slack.com/files-pri/T0331TJV7-F06TAC0KTD4/780_3_avenue.pdf",
+                                "url_private_download": "https://files.slack.com/files-pri/T0331TJV7-F06TAC0KTD4/download/780_3_avenue.pdf",
                                 "media_display_type": "unknown",
-                                "thumb_pdf": "https://files.slack.com/files-tmb/T0331TJV7-F06RL4U69M4-a45984aad9/29n-130sfpp-6cars-cibse-up-80-20-20_thumb_pdf.png",
-                                "thumb_pdf_w": 909,
-                                "thumb_pdf_h": 1285,
-                                "permalink": "https://gravityholdings.slack.com/files/UGFL0UGGN/F06RL4U69M4/29n-130sfpp-6cars-cibse-up-80-20-20.pdf",
-                                "permalink_public": "https://slack-files.com/T0331TJV7-F06RL4U69M4-a8ea6a2cc6",
+                                "thumb_pdf": "https://files.slack.com/files-tmb/T0331TJV7-F06TAC0KTD4-02b85762b2/780_3_avenue_thumb_pdf.png",
+                                "thumb_pdf_w": 1928,
+                                "thumb_pdf_h": 1980,
+                                "permalink": "https://gravityholdings.slack.com/files/UGFL0UGGN/F06TAC0KTD4/780_3_avenue.pdf",
+                                "permalink_public": "https://slack-files.com/T0331TJV7-F06TAC0KTD4-34fbfcb868",
                                 "comments_count": 0,
                                 "shares": {},
                                 "channels": [],
@@ -491,10 +585,10 @@
                         "selected_option": {
                             "text": {
                                 "type": "plain_text",
-                                "text": "ELCON",
+                                "text": "Delaware-ELV",
                                 "emoji": True,
                             },
-                            "value": "6",
+                            "value": "5",
                         },
                     }
                 },
@@ -504,10 +598,10 @@
                         "selected_option": {
                             "text": {
                                 "type": "plain_text",
-                                "text": "Nuveen",
+                                "text": "EOS Hospitality",
                                 "emoji": True,
                             },
-                            "value": "24",
+                            "value": "12",
                         },
                     }
                 },
@@ -517,10 +611,10 @@
                         "selected_option": {
                             "text": {
                                 "type": "plain_text",
-                                "text": "Rosslyn Overlook - 1616 North Fort Myer Drive",
+                                "text": "Oceans Edge Resort Hotel - 5950 Peninsular Avenue",
                                 "emoji": True,
                             },
-                            "value": "493",
+                            "value": "1439",
                         },
                     }
                 },
@@ -536,19 +630,17 @@
                         "value": "asd",
                     }
                 },
-                "cost": {
-                    "number_input-action": {"type": "number_input", "value": "12"}
-                },
+                "cost": {"number_input-action": {"type": "number_input", "value": "1"}},
             }
         },
-        "hash": "1711627234.8stnF1cQ",
-        "title": {"type": "plain_text", "text": "Document Processing", "emoji": True},
+        "hash": "1712675497.n8P8tGBZ",
+        "title": {"type": "plain_text", "text": "Invoice Processing", "emoji": True},
         "clear_on_close": False,
         "notify_on_close": False,
         "close": {"type": "plain_text", "text": "Cancel", "emoji": True},
         "submit": {"type": "plain_text", "text": "Submit", "emoji": True},
         "previous_view_id": None,
-        "root_view_id": "V06RPRV95E1",
+        "root_view_id": "V06TVLQKJ1F",
         "app_id": "A06KV1TBUEQ",
         "external_id": "",
         "app_installed_team_id": "T0331TJV7",
@@ -558,5 +650,3 @@
     "is_enterprise_install": False,
     "enterprise": None,
 }
-
-{'parser': {'Directory': OrderedDict({'1.2': <class 'pluginlib.importer.plugins.directories.Directories'>}), 'DocProcess': OrderedDict({'0.1': <class 'pluginlib.importer.plugins.doc_process.DocProcess'>}), 'FileParser': OrderedDict({'1.0': <class 'pluginlib.importer.plugins.file_parser.FileParser'>}), 'pdf2img': OrderedDict({'1.0': <class 'pluginlib.importer.plugins.pdf2img.Pdf2Img'>}), 'SlackChannelInfo': OrderedDict({'1.2': <class 'pluginlib.importer.plugins.slackchannelinfo.SlackChannelInfo'>}), 'SlackFileInfo': OrderedDict({'1.2': <class 'pluginlib.importer.plugins.slackfileinfo.SlackFileInfo'>}), 'SlackUserInfo': OrderedDict({'1.2': <class 'pluginlib.importer.plugins.slackuserinfo.SlackUserInfo'>}), 'Zipper': OrderedDict({'1.3': <class 'pluginlib.importer.plugins.zipper.Zipper'>})}, 'slackevent': {'MessageEvent': OrderedDict({'1.0': <class 'pluginlib.importer.plugins.message_event.MessageEvent'>})}, 'files': {'FileHandler': OrderedDict({'1.0': <class 'pluginlib.importer.plugins.file_handler.FileHandler'>})}, 'Database': {}, 'eventlogger': {'EventLogger': OrderedDict({'1.0': <class 'pluginlib.importer.plugins.eventlogger.EventLogger'>})}}

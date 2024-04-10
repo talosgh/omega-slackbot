@@ -13,15 +13,25 @@ class FileToDatabase(plugin_loader.Parser):
         """Save file to database
         Args:
             file (str): File path
-            db (obj): Database object
+            username (str): Username
+            user_id (str): User ID
+            db (object): Database object
+        Returns:
+            int: Document ID
         """
+
         import hashlib
         import os
         import magic
         from datetime import datetime
 
         filepath = kwargs.get("file")
+        username = kwargs.get("username")
+        user_id = kwargs.get("user_id")
         db = kwargs.get("db")
+        ofile = kwargs.get("ofile")
+        tag = kwargs.get("tag"), None
+
         try:
             with open(filepath, "rb") as f:
                 file_content = f.read()
@@ -33,8 +43,8 @@ class FileToDatabase(plugin_loader.Parser):
 
                 # Part 1: Try to insert the file information
                 insert_query = """INSERT INTO documents
-                    (file, filename, filesize, mimetype, filehash, timestamp) 
-                    VALUES (%s, %s, %s, %s, %s, %s) 
+                    (file, filename, filesize, mimetype, filehash, timestamp, username, user_id, original_filename, tag) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) 
                     ON CONFLICT (filehash) DO NOTHING;"""
                 params = (
                     file_content,
@@ -43,6 +53,10 @@ class FileToDatabase(plugin_loader.Parser):
                     mimetype,
                     filehash,
                     datetime.now(),
+                    username,
+                    user_id,
+                    ofile,
+                    tag,
                 )
                 db.execute_query(insert_query, params)
 
