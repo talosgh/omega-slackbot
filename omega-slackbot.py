@@ -199,7 +199,7 @@ class OmegaSlackBot:
 
         @self.app.event("app_home_opened")
         def handle_app_home_opened(context):
-            homeview_handler = omega.AppHome(context, self.db).homeview
+            homeview_handler = omega.AppHome(context, self.db)
             self.app.client.views_publish(**homeview_handler.homeview)
 
         @self.app.command("/invoice")
