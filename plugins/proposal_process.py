@@ -8,12 +8,20 @@ class ProposalProcessor(plugin_loader.Parser):
     _version_ = "0.1"
 
     def __init__(self, **kwargs) -> None:
+
         self.logger = get_logger(self._alias_)
         self.app = kwargs.get("app")
         self.context = kwargs.get("context")
         self.db = Database()
 
     def parse(self, **kwargs):
+        """Process proposal form submission
+        Args:
+            body (dict): Request body
+        Returns:
+            dict: Response
+        """
+
         self.ack()
         body = kwargs.get("body")
 

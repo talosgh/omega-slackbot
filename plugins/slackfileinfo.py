@@ -11,6 +11,13 @@ class SlackFileInfo(plugin_loader.Parser):
         self.files = []
 
     def parse(self, **kwargs):
+        """Get file information from Slack
+        Args:
+            file_id (str): File ID
+        Returns:
+            dict: File information
+        """
+
         self.logger.info(f"Getting file info for {kwargs.get('file_id')}")
         try:
             file_info_response = self.app.client.files_info(file=kwargs.get("file_id"))
