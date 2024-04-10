@@ -25,11 +25,14 @@ class AppHome:
             for doc in documents:
                 # Assuming doc[6] is a datetime object, formatting the timestamp
                 timestamp = doc[6].strftime("%d-%m-%Y")
+                doc_title = doc[1][:50]  # Truncate or adjust as necessary
+                uploaded_by = doc[7][:20]  # Truncate or adjust as necessary
+                option_text = f"{doc_title} Uploaded: {timestamp}"
                 doc_list.append(
                     {
                         "text": {
                             "type": "plain_text",
-                            "text": f"{doc[1]} - Uploaded by {doc[7]} on {timestamp}",
+                            "text": f"{option_text}",
                         },
                         "value": str(doc[5]),  # Ensure this is a string as required
                     }
