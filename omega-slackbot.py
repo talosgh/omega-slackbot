@@ -383,7 +383,7 @@ class OmegaSlackBot:
         @self.app.view("proposal_process")
         def handle_proposal_process_submission(ack, body, view):
             ack()
-            """Handle the submission of the invoice processing modal."""
+            """Handle the submission of the invoice processing modal. """
             self.logger.info(f"Processing Proposal Submission...")
             filedata = body["view"]["state"]["values"]["file_upload"][
                 "file_input_action_id_1"
