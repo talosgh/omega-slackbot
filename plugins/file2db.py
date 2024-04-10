@@ -30,7 +30,7 @@ class FileToDatabase(plugin_loader.Parser):
         user_id = kwargs.get("user_id")
         db = kwargs.get("db")
         ofile = kwargs.get("ofile")
-        tag = kwargs.get("tag"), None
+        tag = kwargs.get("tag", None)
 
         try:
             with open(filepath, "rb") as f:
