@@ -83,31 +83,33 @@ class AppHome:
 =======
         import datetime
 
-        doc_query = "SELECT * FROM documents"
-        documents = self.db.execute_query(doc_query)
+            doc_query = "SELECT * FROM documents"
+            documents = self.db.execute_query(doc_query)
 
-        if not documents:  # Checking for an empty list or None
-            doc_list = [
-                {
-                    "text": {
-                        "type": "plain_text",
-                        "text": "No unreviewed documents found!",
-                    },
-                    "value": "no_documents",
-                }
-            ]
-        else:
-            doc_list = []
-            for doc in documents:
-                # Assuming doc[6] is a datetime object, formatting the timestamp
-                timestamp = doc[6].strftime("%d-%m-%Y")
-                doc_list.append({
-                    "text": {
-                        "type": "plain_text",
-                        "text": f"{doc[1]} - Uploaded by {doc[7]} on {timestamp}",
-                    },
-                    "value": str(doc[5]),  # Ensure this is a string as required
-                })
+            if not documents:  # Checking for an empty list or None
+                doc_list = [
+                    {
+                        "text": {
+                            "type": "plain_text",
+                            "text": "No unreviewed documents found!",
+                        },
+                        "value": "no_documents",
+                    }
+                ]
+            else:
+                doc_list = []
+                for doc in documents:
+                    # Assuming doc[6] is a datetime object, formatting the timestamp
+                    timestamp = doc[6].strftime("%d-%m-%Y")
+                    doc_list.append(
+                        {
+                            "text": {
+                                "type": "plain_text",
+                                "text": f"{doc[1]} - Uploaded by {doc[7]} on {timestamp}",
+                            },
+                            "value": str(doc[5]),  # Ensure this is a string as required
+                        }
+                    )
 
         # Define the home view structure with corrected section block for button
         home_view = {
