@@ -1,6 +1,6 @@
 {
     "type": "modal",
-    "callback_id": "doc_process",
+    "callback_id": "proposal_process",
     "title": {
         "type": "plain_text",
         "text": "Document Processing",
